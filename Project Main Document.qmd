@@ -6,11 +6,44 @@ editor: visual
 
 ## Data Analytics Group Project
 
-**Description of Dataset:**
+**Description of Data set:**
+
+**Cleanse Data:**
+
+```{r}
+initial_data <- read.csv("heart_failure_clinical_records_dataset.csv")
+
+```
+
+Check for missing values:
+
+```{r}
+mean(initial_data$age)
+mean(initial_data$anaemia)
+mean(initial_data$creatinine_phosphokinase)
+mean(initial_data$diabetes)
+mean(initial_data$ejection_fraction)
+mean(initial_data$high_blood_pressure)
+mean(initial_data$platelets)
+mean(initial_data$serum_creatinine)
+mean(initial_data$serum_sodium)
+mean(initial_data$sex)
+mean(initial_data$smoking)
+mean(initial_data$time)
+mean(initial_data$DEATH_EVENT)
+```
+
+This means that there are no missing values in the data set, because if there were missing values, then the mean would result in a value of NA for the given attribute.
+
+Check for outliers:
 
 **Analysis of Attributes:**
 
 Age:
+
+```{r}
+
+```
 
 Anemia:
 
