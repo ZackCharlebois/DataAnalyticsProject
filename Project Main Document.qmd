@@ -37,6 +37,18 @@ This means that there are no missing values in the data set, because if there we
 
 Check for outliers:
 
+```{r}
+boxplot(initial_data$age)
+boxplot(initial_data$creatinine_phosphokinase)
+boxplot(initial_data$ejection_fraction)
+boxplot(initial_data$platelets)
+boxplot(initial_data$serum_creatinine)
+boxplot(initial_data$serum_sodium)
+boxplot(initial_data$time)
+```
+
+While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set.
+
 **Analysis of Attributes:**
 
 Age:
