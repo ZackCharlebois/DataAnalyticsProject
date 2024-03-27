@@ -4,9 +4,13 @@ format: html
 editor: visual
 ---
 
-## Data Analytics Group Project
+## Data Analytics Group Project 
+
+## Heart Failure Prediction
 
 **Description of Data set:**
+
+This data set contains information on people with cardiovascular disease, including age and health conditions. The purpose of the data set is to be used to create a predictive model to help those who are at risk or have cardiovascular disease prevent heart failure through early detection. This data set has 13 attributes that can be used to predict mortality by heart failure.
 
 **Cleanse Data:**
 
@@ -31,6 +35,8 @@ mean(initial_data$sex)
 mean(initial_data$smoking)
 mean(initial_data$time)
 mean(initial_data$DEATH_EVENT)
+
+mean(initial_data$serum_creatinine <= 2)
 ```
 
 This means that there are no missing values in the data set, because if there were missing values, then the mean would result in a value of NA for the given attribute.
@@ -47,7 +53,16 @@ boxplot(initial_data$serum_sodium)
 boxplot(initial_data$time)
 ```
 
-While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set.
+While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set. The example below shows how removing the outliers can affect the data.
+
+```{r}
+mean(initial_data$serum_creatinine)
+
+no_outliers_data <- initial_data[-which(initial_data$serum_creatinine>2),]
+
+mean(no_outliers_data$serum_creatinine)
+
+```
 
 **Analysis of Attributes:**
 
