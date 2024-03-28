@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-## Data Analytics Group Project 
+## Data Analytics Group Project
 
 ## Heart Failure Prediction
 
@@ -12,31 +12,33 @@ editor: visual
 
 This data set contains information on people with cardiovascular disease, including age and health conditions. The purpose of the data set is to be used to create a predictive model to help those who are at risk or have cardiovascular disease prevent heart failure through early detection. This data set has 13 attributes that can be used to predict mortality by heart failure.
 
-**Cleanse Data:**
+**Cleaning the Data:**
 
 ```{r}
-initial_data <- read.csv("heart_failure_clinical_records_dataset.csv")
+heart <- read.csv("heart_failure_clinical_records_dataset.csv")
+
+heart
 
 ```
 
 Check for missing values:
 
 ```{r}
-mean(initial_data$age)
-mean(initial_data$anaemia)
-mean(initial_data$creatinine_phosphokinase)
-mean(initial_data$diabetes)
-mean(initial_data$ejection_fraction)
-mean(initial_data$high_blood_pressure)
-mean(initial_data$platelets)
-mean(initial_data$serum_creatinine)
-mean(initial_data$serum_sodium)
-mean(initial_data$sex)
-mean(initial_data$smoking)
-mean(initial_data$time)
-mean(initial_data$DEATH_EVENT)
+mean(heart$age)
+mean(heart$anaemia)
+mean(heart$creatinine_phosphokinase)
+mean(heart$diabetes)
+mean(heart$ejection_fraction)
+mean(heart$high_blood_pressure)
+mean(heart$platelets)
+mean(heart$serum_creatinine)
+mean(heart$serum_sodium)
+mean(heart$sex)
+mean(heart$smoking)
+mean(heart$time)
+mean(heart$DEATH_EVENT)
 
-mean(initial_data$serum_creatinine <= 2)
+mean(heart$serum_creatinine <= 2)
 ```
 
 This means that there are no missing values in the data set, because if there were missing values, then the mean would result in a value of NA for the given attribute.
@@ -44,24 +46,23 @@ This means that there are no missing values in the data set, because if there we
 Check for outliers:
 
 ```{r}
-boxplot(initial_data$age)
-boxplot(initial_data$creatinine_phosphokinase)
-boxplot(initial_data$ejection_fraction)
-boxplot(initial_data$platelets)
-boxplot(initial_data$serum_creatinine)
-boxplot(initial_data$serum_sodium)
-boxplot(initial_data$time)
+boxplot(heart$age)
+boxplot(heart$creatinine_phosphokinase)
+boxplot(heart$ejection_fraction)
+boxplot(heart$platelets)
+boxplot(heart$serum_creatinine)
+boxplot(heart$serum_sodium)
+boxplot(heart$time)
 ```
 
 While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set. The example below shows how removing the outliers can affect the data.
 
 ```{r}
-mean(initial_data$serum_creatinine)
+mean(heart$serum_creatinine)
 
-no_outliers_data <- initial_data[-which(initial_data$serum_creatinine>2),]
+no_outliers_data <- heart[-which(heart$serum_creatinine>2),]
 
 mean(no_outliers_data$serum_creatinine)
-
 ```
 
 **Analysis of Attributes:**
