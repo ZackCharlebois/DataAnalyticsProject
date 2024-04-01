@@ -15,6 +15,8 @@ This data set contains information on people with cardiovascular disease, includ
 **Cleaning the Data:**
 
 ```{r}
+library(tidyverse)
+
 heart <- read.csv("heart_failure_clinical_records_dataset.csv")
 
 heart
@@ -70,29 +72,90 @@ mean(no_outliers_data$serum_creatinine)
 Age:
 
 ```{r}
-
+ggplot(heart, aes(x = age)) +
+  geom_bar()
 ```
 
-Anemia:
+Anaemia:
+
+```{r}
+ggplot(heart, aes(x = anaemia)) +
+  geom_bar()
+```
 
 Creatinine Phosphokinase:
 
+```{r}
+ggplot(heart, aes(x = age, y = creatinine_phosphokinase)) +
+  geom_point()
+```
+
 Diabetes:
+
+```{r}
+ggplot(heart, aes(x = diabetes)) +
+  geom_bar()
+```
 
 Ejection Fraction:
 
+```{r}
+ggplot(heart, aes(x = age, y = ejection_fraction)) +
+  geom_point()
+```
+
 High Blood Pressure:
+
+```{r}
+ggplot(heart, aes(x = high_blood_pressure)) +
+  geom_bar()
+```
 
 Platelets:
 
+```{r}
+ggplot(heart, aes(x = age, y = platelets)) +
+  geom_point()
+```
+
 Serum Creatine:
+
+```{r}
+ggplot(heart, aes(x = age, y = serum_creatinine)) +
+  geom_point()
+```
 
 Serum Sodium:
 
+```{r}
+ggplot(heart, aes(x = age, y = serum_sodium)) +
+  geom_point()
+```
+
 Sex:
+
+```{r}
+ggplot(heart, aes(x = sex)) +
+  geom_bar()
+```
 
 Smoking:
 
+```{r}
+ggplot(heart, aes(x = smoking)) +
+  geom_bar()
+```
+
 Time:
 
+```{r}
+ggplot(heart, aes(x = age, y = time)) +
+  geom_point()
+```
+
 Death Event:
+
+```{r}
+ggplot(heart, aes(x = DEATH_EVENT)) +
+  geom_bar()
+```
