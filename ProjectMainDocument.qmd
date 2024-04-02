@@ -1,5 +1,5 @@
 ---
-title: "Project Phase 1 Document"
+title: "Project Main Document"
 format: html
 editor: visual
 ---
@@ -56,6 +56,10 @@ boxplot(heart$serum_creatinine)
 boxplot(heart$serum_sodium)
 boxplot(heart$time)
 ```
+
+\*\*\*Number of outliers
+
+\*\*\*Check if outliers are in the same sample
 
 While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set. The example below shows how removing the outliers can affect the data.
 
