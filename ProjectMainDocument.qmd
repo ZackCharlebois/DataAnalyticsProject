@@ -8,14 +8,15 @@ editor: visual
 
 ## Heart Failure Prediction
 
-**Description of Data set:**
+#### **Description of Data set:**
 
 This data set contains information on people with cardiovascular disease, including age and health conditions. The purpose of the data set is to be used to create a predictive model to help those who are at risk or have cardiovascular disease prevent heart failure through early detection. This data set has 13 attributes that can be used to predict mortality by heart failure.
 
-**Cleaning the Data:**
+#### **Cleaning the Data:**
 
 ```{r}
 library(tidyverse)
+library("dplyr")
 
 heart <- read.csv("heart_failure_clinical_records_dataset.csv")
 
@@ -57,10 +58,6 @@ boxplot(heart$serum_sodium)
 boxplot(heart$time)
 ```
 
-\*\*\*Number of outliers
-
-\*\*\*Check if outliers are in the same sample
-
 While there are several outliers in some of the attributes, I would not make sense to remove them from the data set. This is because there is a large quantity of outliers, and removing them would have a significant effect on the total amount of data in the data set. The example below shows how removing the outliers can affect the data.
 
 ```{r}
@@ -71,95 +68,321 @@ no_outliers_data <- heart[-which(heart$serum_creatinine>2),]
 mean(no_outliers_data$serum_creatinine)
 ```
 
-**Analysis of Attributes:**
+```{r}
+#(heart$creatinine_phosphokinase)
+#(heart$platelets)
+#heart$serum_creatinine)
+#heart$serum_sodium)
+  
+ggplot(heart, aes(x = creatinine_phosphokinase, y = platelets)) +
+  geom_point()
 
-Age:
+ggplot(heart, aes(x = creatinine_phosphokinase, y = serum_creatinine)) +
+  geom_point()
+
+ggplot(heart, aes(x = creatinine_phosphokinase, y = serum_sodium)) +
+  geom_point()
+
+ggplot(heart, aes(x = serum_creatinine, y = platelets)) +
+  geom_point()
+
+ggplot(heart, aes(x = serum_sodium, y = platelets)) +
+  geom_point()
+
+ggplot(heart, aes(x = serum_creatinine, y = serum_sodium)) +
+  geom_point()
+```
+
+By looking at the graphs of the continuous variables, we can identify any outlier samples that are outliers in more than one attribute. In this data set, almost all of the samples with an outlier have only one outlier, with only one sample with outliers in both creatinine phosphokinase and serum creatinine, which could be removed. To determine if the values should be removed, we need to look at the plausible ranges for the different attriibutes.
+
+-   Age: Ranges from 40 to 95 years, which seems plausible for a heart failure clinical records dataset.
+
+-   Creatinine Phosphokinase: Has a wide range (23 to 7861), with a large standard deviation, indicating significant variability. The maximum value is notably high, which may be worth investigating further.
+
+-   Ejection Fraction: Ranges from 14% to 80%, which covers the expected range for this clinical measure, though the upper range is quite high.
+
+-   Platelets: The count ranges widely from 25100 to 850000, with a standard deviation that suggests variability but within a plausible range.
+
+-   Serum Creatinine: Ranges from 0.5 to 9.4, with the higher end being concerning and indicative of severe renal dysfunction, which is plausible in the context of heart failure but could be considered an outlier.
+
+-   Serum Sodium: Ranges from 113 to 148, with values mostly concentrating around the normal range, though the extremes indicate potential clinical concerns or measurement errors.
+
+-   Sex, Smoking, Diabetes, Anaemia, High Blood Pressure, and DEATH_EVENT: Are binary variables coded as 0 or 1, with their distributions looking plausible for clinical data.
+
+-   Time: Represents the follow-up period in days, with a range from 4 to 285.
+
+Looking at these value ranges, we can see that these values are not outside of the plausible range for each attribute, so none of the values are errors. These high values are physically possible and can help us to determine why the person might have suffered heart failure.
 
 ```{r}
 ggplot(heart, aes(x = age)) +
   geom_bar()
-```
-
-Anaemia:
-
-```{r}
 ggplot(heart, aes(x = anaemia)) +
   geom_bar()
-```
-
-Creatinine Phosphokinase:
-
-```{r}
 ggplot(heart, aes(x = age, y = creatinine_phosphokinase)) +
   geom_point()
-```
-
-Diabetes:
-
-```{r}
 ggplot(heart, aes(x = diabetes)) +
   geom_bar()
-```
-
-Ejection Fraction:
-
-```{r}
 ggplot(heart, aes(x = age, y = ejection_fraction)) +
   geom_point()
-```
-
-High Blood Pressure:
-
-```{r}
 ggplot(heart, aes(x = high_blood_pressure)) +
   geom_bar()
-```
-
-Platelets:
-
-```{r}
 ggplot(heart, aes(x = age, y = platelets)) +
   geom_point()
-```
-
-Serum Creatine:
-
-```{r}
 ggplot(heart, aes(x = age, y = serum_creatinine)) +
   geom_point()
-```
-
-Serum Sodium:
-
-```{r}
 ggplot(heart, aes(x = age, y = serum_sodium)) +
   geom_point()
-```
-
-Sex:
-
-```{r}
 ggplot(heart, aes(x = sex)) +
   geom_bar()
+ggplot(heart, aes(x = DEATH_EVENT)) +
+  geom_bar()
 ```
 
-Smoking:
+## **Analysis of Attributes:**
+
+#### Variation Analysis:
+
+Age
 
 ```{r}
-ggplot(heart, aes(x = smoking)) +
-  geom_bar()
+age_summ <- heart |>
+
+  summarise(Mean = mean(age, na.rm = TRUE),
+
+    Median = median(age, na.rm = TRUE),
+
+    Standard_Deviation = sd(age, na.rm = TRUE),
+
+    IQR = IQR(age, na.rm = TRUE))
+
+print(age_summ)
+
+ggplot(heart, aes(x = age)) +
+
+  geom_histogram(binwidth = 1) +
+
+  labs(title = "Distribution of Age", x = "Age", y = "Count")
+
+ggplot(heart, aes(y = age)) +
+
+  geom_boxplot() +
+
+  labs(title = "Boxplot of Age", y = "Age")
+
+```
+
+Creatinine_phosphokinase
+
+```{r}
+
+```
+
+Ejection_fraction
+
+```{r}
+
+```
+
+Platelets
+
+```{r}
+
+```
+
+Serum_creatinine
+
+```{r}
+
+```
+
+Serum_sodium
+
+```{r}
+
+serum_sodium_summary <- heart %>%
+
+  summarise(
+
+    Mean = mean(serum_sodium, na.rm = TRUE),
+
+    Median = median(serum_sodium, na.rm = TRUE),
+
+    Standard_Deviation = sd(serum_sodium, na.rm = TRUE),
+
+    IQR = IQR(serum_sodium, na.rm = TRUE)
+
+  )
+
+print(serum_sodium_summary)
+
+ggplot(heart, aes(x = serum_sodium)) +
+
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+
+  labs(title = "Distribution of Serum Sodium Levels", x = "Serum Sodium", y = "Count")
+
+ggplot(heart, aes(y = serum_sodium)) +
+
+  geom_boxplot(fill = "lightblue", color = "black") +
+
+  labs(title = "Boxplot of Serum Sodium Levels", y = "Serum Sodium")
 ```
 
 Time:
 
 ```{r}
-ggplot(heart, aes(x = age, y = time)) +
-  geom_point()
+
+time_summary <- heart %>%
+
+  summarise(
+
+    Mean = mean(time, na.rm = TRUE),
+
+    Median = median(time, na.rm = TRUE),
+
+    Standard_Deviation = sd(time, na.rm = TRUE),
+
+    IQR = IQR(time, na.rm = TRUE)
+
+  )
+
+print(time_summary)
+
+ggplot(heart, aes(x = time)) +
+
+  geom_histogram(binwidth = 10, fill = "green", color = "black") +
+
+  labs(title = "Distribution of Time", x = "Time", y = "Count")
+
+ggplot(heart, aes(y = time)) +
+
+  geom_boxplot(fill = "lightgreen", color = "black") +
+
+  labs(title = "Boxplot of Time", y = "Time")
+
+
 ```
 
-Death Event:
+#### Covariation Analysis:
+
+serum_creatinine vs serum_sodium
+
+serum_creatinine vs time
+
+serum_sodium vs time
 
 ```{r}
-ggplot(heart, aes(x = DEATH_EVENT)) +
-  geom_bar()
+cor_sc_ss <- cor(heart$serum_creatinine, heart$serum_sodium)
+
+cor_sc_t <- cor(heart$serum_creatinine, heart$time)
+
+cor_ss_t <- cor(heart$serum_sodium, heart$time)
+
+print(paste("Correlation between serum_creatinine and serum_sodium:", cor_sc_ss))
+
+print(paste("Correlation between serum_creatinine and time:", cor_sc_t))
+
+print(paste("Correlation between platelets and serum_sodium:", cor_ss_t))
+
+
+ggplot(heart, aes(x = serum_creatinine, y = serum_sodium)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+
+  labs(title = "Scatter plot of Serum Creatinine vs Serum Sodium")
+
+
+ggplot(heart, aes(x = serum_creatinine, y = time)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "green") +
+
+  labs(title = "Scatter plot of Serum Creatinine vs Time")
+
+
+ggplot(heart, aes(x = serum_sodium, y = time)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "blue" ) +
+
+  labs(title = "Scatter plot of Serum Sodium vs Time")
+```
+
+creatinine_phosphokinase vs ejection_fraction
+
+creatinine_phosphokinase vs platelets
+
+creatinine_phosphokinase vs serum_creatinine
+
+creatinine_phosphokinase vs serum_sodium
+
+creatinine_phosphokinase vs time
+
+ejection_fraction vs platelets
+
+ejection_fraction vs serum_creatinine
+
+ejection_fraction vs serum_sodium
+
+ejection_fraction vs time
+
+platelets vs serum_creatinine
+
+platelets vs serum_sodium
+
+platelets vs time
+
+```{r}
+
+cor_ejection_fraction_time <- cor(heart$ejection_fraction, heart$time, use = "complete.obs")
+
+cor_platelets_serum_creatinine <- cor(heart$platelets, heart$serum_creatinine, use = "complete.obs")
+
+cor_platelets_serum_sodium <- cor(heart$platelets, heart$serum_sodium, use = "complete.obs")
+
+cor_platelets_time <- cor(heart$platelets, heart$time, use = "complete.obs")
+
+print(paste("Correlation between ejection_fraction and time:", cor_ejection_fraction_time))
+
+print(paste("Correlation between platelets and serum_creatinine:", cor_platelets_serum_creatinine))
+
+print(paste("Correlation between platelets and serum_sodium:", cor_platelets_serum_sodium))
+
+print(paste("Correlation between platelets and time:", cor_platelets_time))
+
+ggplot(heart, aes(x = ejection_fraction, y = time)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+
+  labs(title = "Scatter plot of Ejection Fraction vs Time")
+
+ggplot(heart, aes(x = platelets, y = serum_creatinine)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+
+  labs(title = "Scatter plot of Platelets vs Serum Creatinine")
+
+ggplot(heart, aes(x = platelets, y = serum_sodium)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "green" ) +
+
+  labs(title = "Scatter plot of Platelets vs Serum Sodium")
+
+ggplot(heart, aes(x = platelets, y = time)) +
+
+  geom_point() +
+
+  geom_smooth(method = "lm", se = FALSE, color = "orange") +
+
+  labs(title = "Scatter plot of Platelets vs Time")
 ```
