@@ -376,15 +376,19 @@ ggplot(heart, aes(x = serum_sodium, y = time)) +
 ##### creatinine_phosphokinase vs serum_sodium
 
 ```{r}
-cor_cpk_ef <- cor(heart$creatinine_phosphokinase, heart$ejection_fraction)
-cor_cpk_p <- cor(heart$creatinine_phosphokinase, heart$platelets)
-cor_cpk_sc <- cor(heart$creatinine_phosphokinase, heart$serum_creatinine)
-cor_cpk_ss <- cor(heart$creatinine_phosphokinase, heart$serum_sodium)
+cor_cpk_ef <- cor.test(heart$creatinine_phosphokinase, heart$ejection_fraction)
+cor_cpk_p <- cor.test(heart$creatinine_phosphokinase, heart$platelets)
+cor_cpk_sc <- cor.test(heart$creatinine_phosphokinase, heart$serum_creatinine)
+cor_cpk_ss <- cor.test(heart$creatinine_phosphokinase, heart$serum_sodium)
 
-print(paste("Correlation between creatinine_phosphokinase and ejection_fraction:", cor_cpk_ef))
-print(paste("Correlation between creatinine_phosphokinase and platelets:", cor_cpk_p))
-print(paste("Correlation between creatinine_phosphokinase and serum_creatinine:", cor_cpk_sc))
-print(paste("Correlation between creatinine_phosphokinase and serum_sodium:", cor_cpk_ss))
+print(paste("Correlation between creatinine_phosphokinase and ejection_fraction:"))
+cor_cpk_ef
+print(paste("Correlation between creatinine_phosphokinase and platelets:")) 
+cor_cpk_p
+print(paste("Correlation between creatinine_phosphokinase and serum_creatinine:")) 
+cor_cpk_sc
+print(paste("Correlation between creatinine_phosphokinase and serum_sodium:")) 
+cor_cpk_ss
 
 p1 <- ggplot(heart, aes(x=creatinine_phosphokinase, y=ejection_fraction)) +
   geom_point() +
@@ -426,15 +430,19 @@ print(p4)
 
 ```{r}
   
-cor_cpk_t <- cor(heart$creatinine_phosphokinase, heart$time)
-cor_ef_p <- cor(heart$ejection_fraction, heart$platelets)
-cor_ef_sc <- cor(heart$ejection_fraction, heart$serum_creatinine)
-cor_ef_ss <- cor(heart$ejection_fraction, heart$serum_sodium)
+cor_cpk_t <- cor.test(heart$creatinine_phosphokinase, heart$time)
+cor_ef_p <- cor.test(heart$ejection_fraction, heart$platelets)
+cor_ef_sc <- cor.test(heart$ejection_fraction, heart$serum_creatinine)
+cor_ef_ss <- cor.test(heart$ejection_fraction, heart$serum_sodium)
 
-print(paste("Correlation between creatinine_phosphokinase and time:", cor_cpk_t))
-print(paste("Correlation between ejection_fraction and platelets:", cor_ef_p))
-print(paste("Correlation between ejection_fraction and serum_creatinine:", cor_ef_sc))
-print(paste("Correlation between ejection_fraction and serum_sodium:", cor_ef_ss))
+print(paste("Correlation between creatinine_phosphokinase and time:"))
+cor_cpk_t
+print(paste("Correlation between ejection_fraction and platelets:"))
+cor_ef_p
+print(paste("Correlation between ejection_fraction and serum_creatinine:"))
+cor_ef_sc
+print(paste("Correlation between ejection_fraction and serum_sodium:"))
+cor_ef_ss
 
 # Scatter plot of Creatinine Phosphokinase vs Time 
 ggplot(heart, aes(x = time, y = creatinine_phosphokinase)) + 
