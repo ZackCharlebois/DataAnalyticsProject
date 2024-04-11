@@ -166,6 +166,11 @@ ggplot(heart, aes(y = age)) +
 #### Creatinine_phosphokinase
 
 ```{r}
+
+
+```
+
+```{r}
 creatinine_phosphokinase_summ <- heart |>
   summarise(Mean = mean(creatinine_phosphokinase, na.rm = TRUE),
     Median = median(creatinine_phosphokinase, na.rm = TRUE),
@@ -178,9 +183,16 @@ ggplot(heart, aes(x = creatinine_phosphokinase)) +
   geom_histogram(binwidth = 100) +
   labs(title = "Distribution of Creatinine Phosphokinase", x = "Creatinine Phosphokinase", y = "Count")
 
-ggplot(heart, aes(y = creatinine_phosphokinase)) +
-  geom_boxplot() +
-  labs(title = "Boxplot of Creatinine Phosphokinase", y = "Creatinine Phosphokinase")
+variance_cpk <- var(heart$creatinine_phosphokinase)
+
+ggplot(heart, aes(x = creatinine_phosphokinase)) +
+  geom_boxplot(fill = "skyblue", width = 0.7) +
+  coord_flip() +
+  labs(title = "Boxplot of Creatinine Phosphokinase",
+       y = "creatinine_phosphokinase") +
+  theme(axis.title.y = element_blank())  
+
+print(variance_cpk)
 ```
 
 #### Ejection_fraction
@@ -198,9 +210,16 @@ ggplot(heart, aes(x = ejection_fraction)) +
   geom_histogram(binwidth = 1) +
   labs(title = "Distribution of Ejection Fraction", x = "Ejection Fraction", y = "Count")
 
-ggplot(heart, aes(y = ejection_fraction)) +
-  geom_boxplot() +
-  labs(title = "Boxplot of Ejection Fraction", y = "Ejection Fraction")
+variance_ef <- var(heart$ejection_fraction)
+
+ggplot(heart, aes(x = ejection_fraction)) +
+  geom_boxplot(fill = "skyblue", width = 0.7) +
+  coord_flip() +  # Flip coordinates to make boxplot horizontal
+  labs(title = "Boxplot of Ejection Fraction",
+       y = "Ejection Fraction (%)") +
+  theme(axis.title.y = element_blank())  
+print(variance_ef)
+
 ```
 
 #### Platelets
@@ -320,13 +339,16 @@ ggplot(heart, aes(y = time)) +
 ##### serum_sodium vs time
 
 ```{r}
-cor_sc_ss <- cor(heart$serum_creatinine, heart$serum_sodium)
-cor_sc_t <- cor(heart$serum_creatinine, heart$time)
-cor_ss_t <- cor(heart$serum_sodium, heart$time)
+cor_sc_ss <- cor.test(heart$serum_creatinine, heart$serum_sodium)
+cor_sc_t <- cor.test(heart$serum_creatinine, heart$time)
+cor_ss_t <- cor.test(heart$serum_sodium, heart$time)
 
-print(paste("Correlation between serum_creatinine and serum_sodium:", cor_sc_ss))
-print(paste("Correlation between serum_creatinine and time:", cor_sc_t))
-print(paste("Correlation between platelets and serum_sodium:", cor_ss_t))
+print(paste("Correlation between serum_creatinine and serum_sodium:"))
+cor_sc_ss
+print(paste("Correlation between serum_creatinine and time:"))
+cor_sc_t
+print(paste("Correlation between platelets and serum_sodium:"))
+cor_ss_t
 
 
 ggplot(heart, aes(x = serum_creatinine, y = serum_sodium)) +
