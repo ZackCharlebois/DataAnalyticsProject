@@ -63,9 +63,9 @@ While there are several outliers in some of the attributes, I would not make sen
 ```{r}
 mean(heart$serum_creatinine)
 
-no_outliers_data <- heart[-which(heart$serum_creatinine>2),]
+no_outlier_data <- heart[-which(heart$creatinine_phosphokinase==3964),]
 
-mean(no_outliers_data$serum_creatinine)
+mean(no_outlier_data$serum_creatinine)
 ```
 
 ```{r}
@@ -140,62 +140,110 @@ ggplot(heart, aes(x = DEATH_EVENT)) +
 
 ## **Analysis of Attributes:**
 
-#### Variation Analysis:
+### Variation Analysis:
 
-Age
+#### Age
 
 ```{r}
 age_summ <- heart |>
-
   summarise(Mean = mean(age, na.rm = TRUE),
-
     Median = median(age, na.rm = TRUE),
-
     Standard_Deviation = sd(age, na.rm = TRUE),
-
     IQR = IQR(age, na.rm = TRUE))
 
 print(age_summ)
 
 ggplot(heart, aes(x = age)) +
-
   geom_histogram(binwidth = 1) +
-
   labs(title = "Distribution of Age", x = "Age", y = "Count")
 
 ggplot(heart, aes(y = age)) +
-
   geom_boxplot() +
-
   labs(title = "Boxplot of Age", y = "Age")
 
 ```
 
-Creatinine_phosphokinase
+#### Creatinine_phosphokinase
 
 ```{r}
+creatinine_phosphokinase_summ <- heart |>
+  summarise(Mean = mean(creatinine_phosphokinase, na.rm = TRUE),
+    Median = median(creatinine_phosphokinase, na.rm = TRUE),
+    Standard_Deviation = sd(creatinine_phosphokinase, na.rm = TRUE),
+    IQR = IQR(creatinine_phosphokinase, na.rm = TRUE))
+
+print(creatinine_phosphokinase_summ)
+
+ggplot(heart, aes(x = creatinine_phosphokinase)) +
+  geom_histogram(binwidth = 100) +
+  labs(title = "Distribution of Creatinine Phosphokinase", x = "Creatinine Phosphokinase", y = "Count")
+
+ggplot(heart, aes(y = creatinine_phosphokinase)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Creatinine Phosphokinase", y = "Creatinine Phosphokinase")
+```
+
+#### Ejection_fraction
+
+```{r}
+ejection_fraction_summ <- heart |>
+  summarise(Mean = mean(ejection_fraction, na.rm = TRUE),
+    Median = median(ejection_fraction, na.rm = TRUE),
+    Standard_Deviation = sd(ejection_fraction, na.rm = TRUE),
+    IQR = IQR(ejection_fraction, na.rm = TRUE))
+
+print(ejection_fraction_summ)
+
+ggplot(heart, aes(x = ejection_fraction)) +
+  geom_histogram(binwidth = 1) +
+  labs(title = "Distribution of Ejection Fraction", x = "Ejection Fraction", y = "Count")
+
+ggplot(heart, aes(y = ejection_fraction)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Ejection Fraction", y = "Ejection Fraction")
+```
+
+#### Platelets
+
+```{r}
+platelets_summ <- heart |>
+  summarise(Mean = mean(platelets, na.rm = TRUE),
+    Median = median(platelets, na.rm = TRUE),
+    Standard_Deviation = sd(platelets, na.rm = TRUE),
+    IQR = IQR(platelets, na.rm = TRUE))
+
+print(platelets_summ)
+
+#summary(heart$platelets) 
+ggplot(heart, aes(x = platelets)) + geom_histogram(binwidth = 10000) + labs(title = "Distribution of Platelet Levels") 
+
+ggplot(heart, aes(y = platelets)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Platelets", y = "Platelets")
 
 ```
 
-Ejection_fraction
+#### Serum_creatinine
 
 ```{r}
+serum_creatinine_summ <- heart |>
+  summarise(Mean = mean(serum_creatinine, na.rm = TRUE),
+    Median = median(serum_creatinine, na.rm = TRUE),
+    Standard_Deviation = sd(serum_creatinine, na.rm = TRUE),
+    IQR = IQR(serum_creatinine, na.rm = TRUE))
+
+print(serum_creatinine_summ)
+
+#summary(heart$serum_creatinine) 
+ggplot(heart, aes(x = serum_creatinine)) + geom_histogram(binwidth = 0.1) + labs(title = "Distribution of Serum Creatinine Levels") 
+
+ggplot(heart, aes(y = serum_creatinine)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Serum Creatinine", y = "Serum Creatinine")
 
 ```
 
-Platelets
-
-```{r}
-
-```
-
-Serum_creatinine
-
-```{r}
-
-```
-
-Serum_sodium
+#### Serum_sodium
 
 ```{r}
 
@@ -228,7 +276,7 @@ ggplot(heart, aes(y = serum_sodium)) +
   labs(title = "Boxplot of Serum Sodium Levels", y = "Serum Sodium")
 ```
 
-Time:
+#### Time
 
 ```{r}
 
@@ -263,78 +311,143 @@ ggplot(heart, aes(y = time)) +
 
 ```
 
-#### Covariation Analysis:
+### Covariation Analysis:
 
-serum_creatinine vs serum_sodium
+##### serum_creatinine vs serum_sodium
 
-serum_creatinine vs time
+##### serum_creatinine vs time
 
-serum_sodium vs time
+##### serum_sodium vs time
 
 ```{r}
 cor_sc_ss <- cor(heart$serum_creatinine, heart$serum_sodium)
-
 cor_sc_t <- cor(heart$serum_creatinine, heart$time)
-
 cor_ss_t <- cor(heart$serum_sodium, heart$time)
 
 print(paste("Correlation between serum_creatinine and serum_sodium:", cor_sc_ss))
-
 print(paste("Correlation between serum_creatinine and time:", cor_sc_t))
-
 print(paste("Correlation between platelets and serum_sodium:", cor_ss_t))
 
 
 ggplot(heart, aes(x = serum_creatinine, y = serum_sodium)) +
-
   geom_point() +
-
   geom_smooth(method = "lm", se = FALSE, color = "red") +
-
-  labs(title = "Scatter plot of Serum Creatinine vs Serum Sodium")
-
+  labs(title = "Serum Creatinine vs Serum Sodium")
 
 ggplot(heart, aes(x = serum_creatinine, y = time)) +
-
   geom_point() +
-
-  geom_smooth(method = "lm", se = FALSE, color = "green") +
-
-  labs(title = "Scatter plot of Serum Creatinine vs Time")
-
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(title = "Serum Creatinine vs Time")
 
 ggplot(heart, aes(x = serum_sodium, y = time)) +
-
   geom_point() +
-
-  geom_smooth(method = "lm", se = FALSE, color = "blue" ) +
-
-  labs(title = "Scatter plot of Serum Sodium vs Time")
+  geom_smooth(method = "lm", se = FALSE, color = "red" ) +
+  labs(title = "Serum Sodium vs Time")
 ```
 
-creatinine_phosphokinase vs ejection_fraction
+##### creatinine_phosphokinase vs ejection_fraction
 
-creatinine_phosphokinase vs platelets
+##### creatinine_phosphokinase vs platelets
 
-creatinine_phosphokinase vs serum_creatinine
+##### creatinine_phosphokinase vs serum_creatinine
 
-creatinine_phosphokinase vs serum_sodium
+##### creatinine_phosphokinase vs serum_sodium
 
-creatinine_phosphokinase vs time
+```{r}
+cor_cpk_ef <- cor(heart$creatinine_phosphokinase, heart$ejection_fraction)
+cor_cpk_p <- cor(heart$creatinine_phosphokinase, heart$platelets)
+cor_cpk_sc <- cor(heart$creatinine_phosphokinase, heart$serum_creatinine)
+cor_cpk_ss <- cor(heart$creatinine_phosphokinase, heart$serum_sodium)
 
-ejection_fraction vs platelets
+print(paste("Correlation between creatinine_phosphokinase and ejection_fraction:", cor_cpk_ef))
+print(paste("Correlation between creatinine_phosphokinase and platelets:", cor_cpk_p))
+print(paste("Correlation between creatinine_phosphokinase and serum_creatinine:", cor_cpk_sc))
+print(paste("Correlation between creatinine_phosphokinase and serum_sodium:", cor_cpk_ss))
 
-ejection_fraction vs serum_creatinine
+p1 <- ggplot(heart, aes(x=creatinine_phosphokinase, y=ejection_fraction)) +
+  geom_point() +
+  geom_smooth(method="lm", se = FALSE, color="red") +
+  labs(title="Scatter Plot\nCreatinine Phosphokinase vs Ejection Fraction",
+       x="Creatinine Phosphokinase (units/L)", y="Ejection Fraction (%)")
 
-ejection_fraction vs serum_sodium
+p2 <- ggplot(heart, aes(x=creatinine_phosphokinase, y=platelets)) +
+  geom_point() +
+  geom_smooth(method="lm", se = FALSE, color="red") +
+  labs(title="Scatter Plot\nCreatinine Phosphokinase vs Platelets",
+       x="Creatinine Phosphokinase (units/L)", y="Platelets (%)")
 
-ejection_fraction vs time
+p3 <- ggplot(heart, aes(x=creatinine_phosphokinase, y=serum_creatinine)) +
+  geom_point() +
+  geom_smooth(method="lm", se = FALSE, color="red") +
+  labs(title="Scatter Plot\nCreatinine Phosphokinase vs Serum Creatinine",
+       x="Creatinine Phosphokinase (units/L)", y="Serum Creatinine (%)")
 
-platelets vs serum_creatinine
+p4 <- ggplot(heart, aes(x=creatinine_phosphokinase, y=serum_sodium)) +
+  geom_point() +
+  geom_smooth(method="lm", se = FALSE, color="red") +
+  labs(title="Scatter Plot\nCreatinine Phosphokinase vs Serum Sodium",
+       x="Creatinine Phosphokinase (units/L)", y="Serum Sodium (%)")
 
-platelets vs serum_sodium
+print(p1)
+print(p2)
+print(p3)
+print(p4)
+```
 
-platelets vs time
+##### creatinine_phosphokinase vs time
+
+##### ejection_fraction vs platelets
+
+##### ejection_fraction vs serum_creatinine
+
+##### ejection_fraction vs serum_sodium
+
+```{r}
+  
+cor_cpk_t <- cor(heart$creatinine_phosphokinase, heart$time)
+cor_ef_p <- cor(heart$ejection_fraction, heart$platelets)
+cor_ef_sc <- cor(heart$ejection_fraction, heart$serum_creatinine)
+cor_ef_ss <- cor(heart$ejection_fraction, heart$serum_sodium)
+
+print(paste("Correlation between creatinine_phosphokinase and time:", cor_cpk_t))
+print(paste("Correlation between ejection_fraction and platelets:", cor_ef_p))
+print(paste("Correlation between ejection_fraction and serum_creatinine:", cor_ef_sc))
+print(paste("Correlation between ejection_fraction and serum_sodium:", cor_ef_ss))
+
+# Scatter plot of Creatinine Phosphokinase vs Time 
+ggplot(heart, aes(x = time, y = creatinine_phosphokinase)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "Time", y = "Creatinine Phosphokinase", title = "Creatinine Phosphokinase vs Time") 
+ 
+ 
+# Scatter plot of Ejection Fraction vs Platelets 
+ggplot(heart, aes(x = platelets, y = ejection_fraction)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "Platelets", y = "Ejection Fraction", title = "Ejection Fraction vs Platelets") 
+ 
+# Scatter plot of Ejection Fraction vs Serum Creatinine 
+ggplot(heart, aes(x = serum_creatinine, y = ejection_fraction)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "Serum Creatinine", y = "Ejection Fraction", title = "Ejection Fraction vs Serum Creatinine") 
+ 
+# Scatter plot of Ejection Fraction vs Serum Sodium 
+ggplot(heart, aes(x = serum_sodium, y = ejection_fraction)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "Serum Sodium", y = "Ejection Fraction", title = "Ejection Fraction vs Serum Sodium") 
+
+```
+
+##### ejection_fraction vs time
+
+##### platelets vs serum_creatinine
+
+##### platelets vs serum_sodium
+
+##### platelets vs time
 
 ```{r}
 
