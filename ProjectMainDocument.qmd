@@ -284,7 +284,7 @@ print(serum_sodium_summary)
 
 ggplot(heart, aes(x = serum_sodium)) +
 
-  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
 
   labs(title = "Distribution of Serum Sodium Levels", x = "Serum Sodium", y = "Count")
 
