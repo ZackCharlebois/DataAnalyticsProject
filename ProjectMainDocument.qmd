@@ -163,12 +163,9 @@ ggplot(heart, aes(y = age)) +
 
 ```
 
-#### Creatinine_phosphokinase
+The mean and the median values for age are about 60 years old. The values somewhat follow a normal distribution around 60, with most values being between 50 and 70 and fewer samples at 40 and 80 and some outliers around 90. This distribution makes sense because people with heart disease are more likely to have a heart failure relatively earlier in their life and a shorter overall life expectancy.
 
-```{r}
-
-
-```
+#### Creatinine Phosphokinase
 
 ```{r}
 creatinine_phosphokinase_summ <- heart |>
@@ -195,7 +192,7 @@ ggplot(heart, aes(x = creatinine_phosphokinase)) +
 print(variance_cpk)
 ```
 
-#### Ejection_fraction
+#### Ejection Fraction
 
 ```{r}
 ejection_fraction_summ <- heart |>
@@ -242,7 +239,7 @@ ggplot(heart, aes(y = platelets)) +
 
 ```
 
-#### Serum_creatinine
+#### Serum Creatinine
 
 ```{r}
 serum_creatinine_summ <- heart |>
@@ -262,7 +259,7 @@ ggplot(heart, aes(y = serum_creatinine)) +
 
 ```
 
-#### Serum_sodium
+#### Serum Sodium
 
 ```{r}
 
@@ -332,11 +329,17 @@ ggplot(heart, aes(y = time)) +
 
 ### Covariation Analysis:
 
-##### serum_creatinine vs serum_sodium
+##### Serum Creatinine vs Serum Sodium
 
-##### serum_creatinine vs time
+Serum Creatinine and Serum Sodium have a slight negative correlation, where as serum sodium increases, serum creatinine tends to decrease. The p-value for this correlation is less than 0.5, which means the correlation between serum creatinine and serum sodium is significant.
 
-##### serum_sodium vs time
+##### Serum Creatinine vs Time
+
+Serum Creatinine and Time have a negative correlation, where as serum creatinine increase, the time, which is the number of days in the follow up period, decreases. The p-value for this correlation is less than 0.5, which means the correlation between serum creatinine and time is significant.
+
+##### Serum Sodium vs Time
+
+The regression for Serum Sodium and Time shows a positive trend, where as serum sodium increases, the number of days in the follow up period also increases. However, the p-value is greater than 0.5, which means we accept the null hypothesis, which is that there is no significant correlation between serum sodium and time.
 
 ```{r}
 cor_sc_ss <- cor.test(heart$serum_creatinine, heart$serum_sodium)
@@ -367,13 +370,13 @@ ggplot(heart, aes(x = serum_sodium, y = time)) +
   labs(title = "Serum Sodium vs Time")
 ```
 
-##### creatinine_phosphokinase vs ejection_fraction
+##### Creatinine Phosphokinase vs Ejection Fraction
 
-##### creatinine_phosphokinase vs platelets
+##### Creatinine Phosphokinase vs Platelets
 
-##### creatinine_phosphokinase vs serum_creatinine
+##### Creatinine Phosphokinase vs Serum Creatinine
 
-##### creatinine_phosphokinase vs serum_sodium
+##### Creatinine Phosphokinase vs Serum Sodium
 
 ```{r}
 cor_cpk_ef <- cor.test(heart$creatinine_phosphokinase, heart$ejection_fraction)
@@ -420,13 +423,13 @@ print(p3)
 print(p4)
 ```
 
-##### creatinine_phosphokinase vs time
+##### Creatinine Phosphokinase vs Time
 
-##### ejection_fraction vs platelets
+##### Ejection Fraction vs Platelets
 
-##### ejection_fraction vs serum_creatinine
+##### Ejection Fraction vs Serum Creatinine
 
-##### ejection_fraction vs serum_sodium
+##### Ejection Fraction vs Serum Sodium
 
 ```{r}
   
@@ -471,31 +474,35 @@ ggplot(heart, aes(x = serum_sodium, y = ejection_fraction)) +
 
 ```
 
-##### ejection_fraction vs time
+##### Ejection Fraction vs Time
 
-##### platelets vs serum_creatinine
+##### Platelets vs Serum Creatinine
 
-##### platelets vs serum_sodium
+##### Platelets vs Serum Sodium
 
-##### platelets vs time
+##### Platelets vs Time
 
 ```{r}
 
-cor_ejection_fraction_time <- cor(heart$ejection_fraction, heart$time, use = "complete.obs")
+cor_ejection_fraction_time <- cor.test(heart$ejection_fraction, heart$time, use = "complete.obs")
 
-cor_platelets_serum_creatinine <- cor(heart$platelets, heart$serum_creatinine, use = "complete.obs")
+cor_platelets_serum_creatinine <- cor.test(heart$platelets, heart$serum_creatinine, use = "complete.obs")
 
-cor_platelets_serum_sodium <- cor(heart$platelets, heart$serum_sodium, use = "complete.obs")
+cor_platelets_serum_sodium <- cor.test(heart$platelets, heart$serum_sodium, use = "complete.obs")
 
-cor_platelets_time <- cor(heart$platelets, heart$time, use = "complete.obs")
+cor_platelets_time <- cor.test(heart$platelets, heart$time, use = "complete.obs")
 
-print(paste("Correlation between ejection_fraction and time:", cor_ejection_fraction_time))
+print(paste("Correlation between ejection_fraction and time:"))
+cor_ejection_fraction_time
 
-print(paste("Correlation between platelets and serum_creatinine:", cor_platelets_serum_creatinine))
+print(paste("Correlation between platelets and serum_creatinine:")) 
+cor_platelets_serum_creatinine
 
-print(paste("Correlation between platelets and serum_sodium:", cor_platelets_serum_sodium))
+print(paste("Correlation between platelets and serum_sodium:")) 
+cor_platelets_serum_sodium
 
-print(paste("Correlation between platelets and time:", cor_platelets_time))
+print(paste("Correlation between platelets and time:")) 
+cor_platelets_time
 
 ggplot(heart, aes(x = ejection_fraction, y = time)) +
 
@@ -529,3 +536,5 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
   labs(title = "Scatter plot of Platelets vs Time")
 ```
+
+## Research Questions:
