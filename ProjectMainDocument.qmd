@@ -1,4 +1,5 @@
 ---
+1--
 title: "Project Main Document"
 format: html
 editor: visual
@@ -192,6 +193,8 @@ ggplot(heart, aes(x = creatinine_phosphokinase)) +
 print(variance_cpk)
 ```
 
+The high coefficient of variation indicates that the creatinine phosphokinase levels vary widely among the patients in this dataset. This wide variation suggests that the levels can be extremely variable from one patient to another, which could be due to individual differences or varying severities of heart conditions.
+
 #### Ejection Fraction
 
 ```{r}
@@ -219,6 +222,8 @@ print(variance_ef)
 
 ```
 
+The moderate coefficient of variation for ejection fraction suggests that while there is some variability in how well the heart pumps blood with each beat, it is less varied compared to creatinine phosphokinase. This might reflect a somewhat consistent measure of heart function among patients with heart failure.
+
 #### Platelets
 
 ```{r}
@@ -239,6 +244,8 @@ ggplot(heart, aes(y = platelets)) +
 
 ```
 
+The x-axis represents the platelet count, divided into bins, and the y-axis represents the count of observations within each bin. The histogram shows a multimodal distribution, with the most prominent peak around 250,000 platelets. There are smaller peaks observed at lower and higher platelet counts. The distribution has a long tail extending towards higher platelet counts, indicating some higher values in the dataset, though these are less frequent.
+
 #### Serum Creatinine
 
 ```{r}
@@ -258,6 +265,8 @@ ggplot(heart, aes(y = serum_creatinine)) +
   labs(title = "Boxplot of Serum Creatinine", y = "Serum Creatinine")
 
 ```
+
+This is a histogram that shows the frequency distribution of serum creatinine levels among a sample population.The x-axis is labeled "serum_creatinine" and ranges from 0 to 7.5, indicating the serum creatinine levels in mg/dL.The y-axis is labeled "count" and shows the number of occurrences for each serum creatinine level.The histogram peaks around 1.0 mg/dL, suggesting that this is the most common serum creatinine level in the sample. The distribution is right-skewed, indicating that higher creatinine levels are less common but extend to about 7.5 mg/dL.
 
 #### Serum Sodium
 
@@ -291,6 +300,10 @@ ggplot(heart, aes(y = serum_sodium)) +
 
   labs(title = "Boxplot of Serum Sodium Levels", y = "Serum Sodium")
 ```
+
+1.  Boxplot of Serum Sodium Levels: The boxplot indicates that the median serum sodium level is around 135 mEq/L, which is within normal serum sodium ranges, but there are several outliers on the lower side indicating patients with hyponatremia.
+
+2.  Distribution of Serum Sodium Levels: This histogram shows a left-skewed distribution, suggesting that a lower serum sodium level is less common but present in the patient population, which can be critical in heart failure management.
 
 #### Time
 
@@ -326,6 +339,10 @@ ggplot(heart, aes(y = time)) +
 
 
 ```
+
+1.  Distribution of Time: This histogram displays the follow-up period 'time' with a varied distribution, indicating that the follow-up times were not uniform across patients, which might affect longitudinal analyses.
+
+2.  Summary Statistics: The mean serum sodium is higher than the median, confirming the skewness seen in the histogram. The interquartile range (IQR) is 130 mEq/L, indicating a moderate spread in serum sodium levels among patients.
 
 ### Covariation Analysis:
 
@@ -372,11 +389,19 @@ ggplot(heart, aes(x = serum_sodium, y = time)) +
 
 ##### Creatinine Phosphokinase vs Ejection Fraction
 
+There is a very weak negative correlation between creatinine phosphokinase levels and ejection fraction. This suggests that there is no significant linear relationship between these variables.
+
 ##### Creatinine Phosphokinase vs Platelets
+
+The correlation is very weakly positive, indicating that there is essentially no meaningful linear relationship between creatinine phosphokinase levels and platelet counts.
 
 ##### Creatinine Phosphokinase vs Serum Creatinine
 
+This very weak negative correlation suggests that changes in creatinine phosphokinase levels do not reliably predict changes in serum creatinine levels.
+
 ##### Creatinine Phosphokinase vs Serum Sodium
+
+A weak positive correlation is observed here, but it is not strong enough to indicate a significant linear relationship. Variations in creatinine phosphokinase seem to have little effect on serum sodium levels.
 
 ```{r}
 cor_cpk_ef <- cor.test(heart$creatinine_phosphokinase, heart$ejection_fraction)
@@ -425,14 +450,21 @@ print(p4)
 
 ##### Creatinine Phosphokinase vs Time
 
+The image displays a scatter plot titled "Creatinine Phosphokinase vs Time". The x-axis, labeled "Time", appears to be measured in days, although the units are not explicitly stated. The y-axis is labeled "Creatinine Phosphokinase" and is measured in units (presumably U/L, a common unit for enzyme activity).The majority of the data points are clustered near the lower part of the y-axis, suggesting that most of the Creatinine Phosphokinase measurements are relatively low.There are several outliers with significantly higher Creatinine Phosphokinase values, some reaching up to 8000 U/L. A red trend line is drawn across the plot, which appears to be relatively flat, indicating that there is no strong  trend of increasing or decreasing Creatinine Phosphokinase levels over time
+
 ##### Ejection Fraction vs Platelets
+
+The image displays a scatter plot titled "Ejection Fraction vs Platelets." This plot is used to visualize the relationship between the ejection fraction of the heart and the platelet count in the blood. The X Represents the platelet count, ranging from 0 to approximately 800,000. The Y Represents the ejection fraction, ranging from approximately 20% to 80%. The scatter plot consists of numerous black dots, each representing an individual data point correlating a specific platelet count to an ejection fraction value. A red line is drawn across the plot, indicating a trend line. This line appears to be relatively flat, suggesting that there might be a weak or no significant linear relationship between platelet count and ejection fraction based on the data presented.
 
 ##### Ejection Fraction vs Serum Creatinine
 
+The image displays a scatter plot titled "Ejection Fraction vs Serum Creatinine." The x-axis represents serum creatinine levels, ranging from approximately 0.5 to 9.0 mg/dL, while the y-axis represents ejection fraction percentages, ranging from about 20% to 80%. The plot is populated with numerous data points, indicating individual measurements of ejection fraction at corresponding serum creatinine levels. A red line is drawn across the plot, which appears to be a trend line, although it is relatively flat, suggesting a weak or no significant correlation between serum creatinine levels and ejection fraction percentages based on the visual representation. 
+
 ##### Ejection Fraction vs Serum Sodium
 
+The image displays a scatter plot titled "Ejection Fraction vs Serum Sodium." The x-axis is labeled "Serum Sodium" and ranges from 120 to 145. The y-axis is labeled "Ejection Fraction" and ranges from about 20 to 80. The plot contains numerous black data points scattered across the graph, indicating individual observations of serum sodium levels and their corresponding ejection fraction percentages. A red line is also present on the graph, representing a trend line (possibly a linear regression line) that suggests a positive correlation between serum sodium levels and ejection fraction. This implies that as serum sodium levels increase, there is a general increase in ejection fraction percentages.
+
 ```{r}
-  
 cor_cpk_t <- cor.test(heart$creatinine_phosphokinase, heart$time)
 cor_ef_p <- cor.test(heart$ejection_fraction, heart$platelets)
 cor_ef_sc <- cor.test(heart$ejection_fraction, heart$serum_creatinine)
@@ -476,11 +508,19 @@ ggplot(heart, aes(x = serum_sodium, y = ejection_fraction)) +
 
 ##### Ejection Fraction vs Time
 
+Scatter plot of Ejection Fraction vs Time: The scatter plot with a slightly upward trend suggests a very weak positive correlation, meaning higher ejection fractions might be associated with longer follow-up times.
+
 ##### Platelets vs Serum Creatinine
+
+Scatter plot of Platelets vs Serum Creatinine: The relatively flat fitted line suggests no significant linear relationship between platelet count and serum creatinine levels.
 
 ##### Platelets vs Serum Sodium
 
+Scatter plot of Platelets vs Serum Sodium: The plot shows a weak upward trend, hinting at a weak positive relationship between platelets and serum sodium.
+
 ##### Platelets vs Time
+
+Scatter plot of Platelets vs Time: The flat trend line suggests no clear linear relationship between platelets and follow-up time.
 
 ```{r}
 
@@ -538,3 +578,85 @@ ggplot(heart, aes(x = platelets, y = time)) +
 ```
 
 ## Research Questions:
+
+1.  Can we predict which patients are likely to have a serum sodium level below the normal range based on their ejection fraction and time of follow-up?
+
+2.  Is it possible to model serum creatinine levels as a function of platelet count and time since the last follow-up?
+
+3.  How does the ejection fraction correlate with serum sodium levels among patients with heart failure?
+
+4.  Can we classify patients into low, medium, and high risk for heart complications based on their platelet count and ejection fraction?
+
+5.  Does the presence of diabetes modify the relationship between ejection fraction and time of follow-up?
+
+    We can use a linear regression model and mutation to answer this question. This is because we can mutate a value that is a ratio of ejection fraction and time and use that in a linear regression model with diabetes to see the relationship between the attributes.
+
+    ```{r}
+    ef_t_ratio_data <- mutate(heart, ef_t_ratio = heart$ejection_fraction / heart$time)
+    model <- lm(ef_t_ratio ~ diabetes, data = ef_t_ratio_data)
+    summary(model)
+    ```
+
+6.  What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?
+
+7.  Is there a significant interaction effect between diabetes status and smoking on serum sodium levels?
+
+    Because we have two different independent variables in this question, we should use a multiple regression model to analyze the relationships between the variables.
+
+    ```{r}
+    model <- lm(serum_sodium ~ diabetes * smoking, data = heart)
+    summary(model)
+    ```
+
+8.  Can we predict the duration of hospital stay based on initial serum creatinine levels and platelet counts?
+
+9.  What are the primary factors associated with abnormal serum sodium levels in heart failure patients?
+
+10. Which attribute has the greatest effect on chances of dying from heart failure?
+
+11. Which attributes have the most samples outside the healthy range?
+
+12. Is there a relation between smoking and creatinine phosphokinase, serum creatine, and serum sodium levels?
+
+13. What are the healthy ranges of the attributes?
+
+14. How are the rates of death from heart failure and smoking related?
+
+15. How does Creatinine Phosphokinase affect the rate of survival of heart failure?
+
+16. What is the variation for death by heart failure by demographic (gender, smoking, etc)?
+
+17.  Are there specific subgroups within the population that are at higher risk of developing heart failure?
+
+18.  Which factors have the greatest influence on long-term outcomes, and how do they change over time?
+
+19. What is the distribution of age among patients who experienced a heart failure death event?
+
+20. How does anaemia affect the mortality rate in heart failure patients?
+
+    To answer this question, we will use a logistic regression model. This is because we have two categorical variables and we want to see the relationship between them.
+
+    ```{r}
+    model <- glm(DEATH_EVENT ~ anaemia, data = heart, family = binomial)
+    summary(model)
+    ```
+
+21. Does having diabetes increase the risk of death in heart failure patients?
+
+    We can use a logistic regression model to see if diabetes has an effect on death rates from heart failure because both diabetes and DEATH_EVENT are categorical variables.
+
+    ```{r}
+
+    ```
+
+22. What are the typical ejection fraction values in patients who survive vs. those who don't?
+
+23. How does high blood pressure impact the survival rates of heart failure patients?
+
+24. Are lower platelet counts associated with higher mortality in heart failure patients?
+
+25. What role does serum creatinine play in predicting heart failure outcomes?
+
+26. How does serum sodium concentration relate to heart failure mortality?
+
+27. Does the gender or smoking status of a patient significantly influence heart failure outcomes?
