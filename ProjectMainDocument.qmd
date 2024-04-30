@@ -616,7 +616,9 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     ### Add all attributes
 
-    This is a classification question. We can use a logistic regression model with platelet count and ejection fraction as the independent variables and death event as the dependent variable. We can separate into risk categories by dividing the test samples into three categories based on the predicted probabilities.
+    Classification
+
+    We can use a logistic regression model, decision tree, or svm model with all of the patients attributes as the independent variables and death event as the dependent variable. We can separate into risk categories by dividing the test samples into three categories based on the predicted probabilities.
 
     ```{r}
     train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
@@ -640,44 +642,52 @@ ggplot(heart, aes(x = platelets, y = time)) +
     risk_data
     ```
 
-    As seen above, we can use platelet count and ejection fraction to assign a risk category for each sample in the data set. We can see that in the test data set, most of the samples fall in the low or medium risk categories. This could potentially be caused by the test data being a smaller section of the whole data set.
+4.  **Which attributes can be used to predict if a patient has diabetes?**
 
-4.  **Does the presence of diabetes modify the relationship between ejection fraction and time of follow-up?**
-
-    We can use a linear regression model and mutation to answer this question. This is because we can mutate a value that is a ratio of ejection fraction and time and use that in a linear regression model with diabetes to see the relationship between the attributes.
+    Classification
 
     ```{r}
-    ef_t_ratio_data <- mutate(heart, ef_t_ratio = heart$ejection_fraction / heart$time)
-    model <- lm(ef_t_ratio ~ diabetes, data = ef_t_ratio_data)
-    summary(model)
-    ```
 
-    We can see that the affect of diabetes on the relationship between ejection fraction and follow up time is not significant, because the p-value of the model is greater than 0.05, which means we accept the null hypothesis, which is that there is no relation.
+    ```
 
 5.  **What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?**
 
     If we want to predict follow-up time, we can create a prediction model using a multiple regression model of the different attributes. We would need to create the model and use a portion of the data set to train.
 
-6.  **Is there a significant interaction effect between all of the attributes on serum sodium levels?**
+6.  **Is there a significant interaction effect between all of the other attributes on serum sodium levels?**
 
     ### Add all attributes
 
-    Because we have two different independent variables in this question, we should use a multiple regression model to analyze the relationships between the variables.
+    Regression
 
     ```{r}
     model <- lm(serum_sodium ~ diabetes * smoking, data = heart)
     summary(model)
     ```
 
-    To answer the above question, we can look at the p-values of the independent variables in the model. If the p-value is less than 0.05, then there is a significant relationship between the variables. In this case, the p-values for diabetes and smoking are both above 0.05. This means we accept the null hypothesis, which states that there is no significant relationship between diabetes or smoking on serum sodium levels.
+7.  **How do all of the different attributes affect the rate of mortality from heart failure?**
 
-7.  **Can we predict if a person was smoking based on all of the other attributes?**
+    Classification
+
+    ```{r}
+
+    ```
+
+    1.  **Follow up: Which attribute has the greatest effect on chances of dying from heart failure?**
+
+        Classification
+
+        ```{r}
+
+        ```
+
+8.  **Can we predict if a person was smoking based on all of the other attributes?**
 
     Multivariate Analysis of Variance or Multiple Linear Regression. If looking at the relationship between smoking and these three continuous variables simultaneously, we can determine if the mean vectors of these measurements differ between smokers and non-smokers. Multiple linear regression could be used if we are focusing on the influence of smoking on each measure separately.
 
-8.  **Are there specific subgroups within the population that are at higher risk of developing heart failure?**
+    ```{r}
 
-    Cluster Analysis or Decision Trees, this is because cluster analysis could identify distinct subgroups within the population based on similarities in their characteristics. Decision trees can be used to create a model that predicts the risk of heart failure, providing a clear path of decision nodes that highlight risk factors and their thresholds.
+    ```
 
 9.  **What is the distribution of age among patients who experienced a heart failure death event?**
 
@@ -697,6 +707,14 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     T-test, Since this is about comparing the means of a continuous variable (ejection fraction) between two groups (survivors vs. non-survivors), a t-test is appropriate.
 
+    ```{r}
+
+    ```
+
 11. **Are lower platelet counts associated with higher mortality in heart failure patients?**
 
     Use logistic regression to assess if lower platelet counts are associated with higher mortality, adjusting for other factors., Logistic regression is suitable if the outcome is binary
+
+    ```{r}
+
+    ```

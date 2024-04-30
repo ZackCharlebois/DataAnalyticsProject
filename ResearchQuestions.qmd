@@ -1,0 +1,153 @@
+---
+title: "Research Questions"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library("dplyr")
+
+heart <- read.csv("heart_failure_clinical_records_dataset.csv")
+heart
+```
+
+## Research Questions:
+
+1.  **Can we predict which patients are likely to have a serum sodium level below the normal range based on their ejection fraction and time of follow-up?**
+
+    We could use Linear regression , if serum creatinine levels are treated as a continuous dependent variable and multiple regression if there are non linear relationships
+
+    ```{r}
+    ggplot(heart, aes(x=ejection_fraction, y=serum_sodium, color=factor(DEATH_EVENT), shape=factor(DEATH_EVENT))) +
+      geom_point(alpha=0.7) +
+      labs(title="Scatter Plot of Ejection Fraction vs. Serum Sodium Levels",
+           x="Ejection Fraction (%)", y="Serum Sodium (mEq/L)") +
+      theme_minimal()
+
+
+    correlation_result <- cor.test(heart$ejection_fraction, heart$serum_sodium)
+    print(correlation_result)
+
+    ```
+
+2.  **Is it possible to model serum creatinine levels as a function of platelet count and time since the last follow-up?**
+
+    Logistic regression for binary outcome
+
+    ```{r}
+    heart$high_serum_creatinine <- ifelse(heart$serum_creatinine > 1.2, 1, 0)
+
+    # Fit logistic regression model
+    model <- glm(high_serum_creatinine ~ platelets + time, data = heart, family = binomial())
+
+    # Summary of the model
+    summary(model)
+    ```
+
+3.  **Can we classify patients into low, medium, and high risk for heart complications based on their platelet count and ejection fraction?**
+
+    ### Add all attributes
+
+    Classification
+
+    We can use a logistic regression model, decision tree, or svm model with all of the patients attributes as the independent variables and death event as the dependent variable. We can separate into risk categories by dividing the test samples into three categories based on the predicted probabilities.
+
+    ```{r}
+    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+    test_indices <- setdiff(1:nrow(heart), train_indices)  
+    train_data <- heart[train_indices, ]
+    test_data <- heart[test_indices, ]
+
+    model <- glm(DEATH_EVENT ~ platelets + ejection_fraction, data = train_data, family = binomial)
+
+    prediction <- predict(model, newdata = test_data, type = "response")
+
+    low <- 0.33
+    medium <- 0.66
+
+    risk_category <- ifelse(prediction < low, "Low", 
+                             ifelse(prediction < medium, "Medium", 
+                                    ifelse(prediction > medium, "High", "")))
+
+    risk_data <- data.frame(platelets = test_data$platelets, ejection_fraction = test_data$ejection_fraction, risk_category = risk_category)
+
+    risk_data
+    ```
+
+4.  **Which attributes can be used to predict if a patient has diabetes?**
+
+    Classification
+
+    ```{r}
+
+    ```
+
+5.  **What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?**
+
+    If we want to predict follow-up time, we can create a prediction model using a multiple regression model of the different attributes. We would need to create the model and use a portion of the data set to train.
+
+6.  **Is there a significant interaction effect between all of the other attributes on serum sodium levels?**
+
+    ### Add all attributes
+
+    Regression
+
+    ```{r}
+    model <- lm(serum_sodium ~ diabetes * smoking, data = heart)
+    summary(model)
+    ```
+
+7.  **How do all of the different attributes affect the rate of mortality from heart failure?**
+
+    Classification
+
+    ```{r}
+
+    ```
+
+    1.  **Follow up: Which attribute has the greatest effect on chances of dying from heart failure?**
+
+        Classification
+
+        ```{r}
+
+        ```
+
+8.  **Can we predict if a person was smoking based on all of the other attributes?**
+
+    Multivariate Analysis of Variance or Multiple Linear Regression. If looking at the relationship between smoking and these three continuous variables simultaneously, we can determine if the mean vectors of these measurements differ between smokers and non-smokers. Multiple linear regression could be used if we are focusing on the influence of smoking on each measure separately.
+
+    ```{r}
+
+    ```
+
+9.  **What is the distribution of age among patients who experienced a heart failure death event?**
+
+    This question can be answered using visualization to view the distribution of ages for patients who died from heart failure.
+
+    ```{r}
+    ggplot(heart, aes(x = age)) +
+      geom_histogram(binwidth = 1) +
+      facet_wrap(~ DEATH_EVENT) +
+      labs(title = "Distribution of Age", x = "Age", y = "Count")
+
+    ```
+
+    By using the facet feature to separate the graph for age based on death event, we can see the distribution of ages for those who lived and died from heart failure. The graph of samples who survived is much more concentrated to the left of the graph as compared to the graph of samples who died. The graph of samples who died has a much greater number of samples in the higher ages, which tells us that people who are older are much less likely to survive heart failure than people who are younger.
+
+10. **What are the typical ejection fraction values in patients who survive vs. those who don't?**
+
+    T-test, Since this is about comparing the means of a continuous variable (ejection fraction) between two groups (survivors vs. non-survivors), a t-test is appropriate.
+
+    ```{r}
+
+    ```
+
+11. **Are lower platelet counts associated with higher mortality in heart failure patients?**
+
+    Use logistic regression to assess if lower platelet counts are associated with higher mortality, adjusting for other factors., Logistic regression is suitable if the outcome is binary
+
+    ```{r}
+
+    ```
