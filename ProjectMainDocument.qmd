@@ -585,15 +585,36 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     We could use Linear regression , if serum creatinine levels are treated as a continuous dependent variable and multiple regression if there are non linear relationships
 
+    ```{r}
+    ggplot(heart, aes(x=ejection_fraction, y=serum_sodium, color=factor(DEATH_EVENT), shape=factor(DEATH_EVENT))) +
+      geom_point(alpha=0.7) +
+      labs(title="Scatter Plot of Ejection Fraction vs. Serum Sodium Levels",
+           x="Ejection Fraction (%)", y="Serum Sodium (mEq/L)") +
+      theme_minimal()
+
+
+    correlation_result <- cor.test(heart$ejection_fraction, heart$serum_sodium)
+    print(correlation_result)
+
+    ```
+
 2.  **Is it possible to model serum creatinine levels as a function of platelet count and time since the last follow-up?**
 
     Logistic regression for binary outcome
 
-3.  **How does the ejection fraction correlate with serum sodium levels among patients with heart failure?**
+    ```{r}
+    heart$high_serum_creatinine <- ifelse(heart$serum_creatinine > 1.2, 1, 0)
 
-    We can use Visualization to see the relationship between ejection fraction and serum sodium level using the scatter plots charts.
+    # Fit logistic regression model
+    model <- glm(high_serum_creatinine ~ platelets + time, data = heart, family = binomial())
 
-4.  **Can we classify patients into low, medium, and high risk for heart complications based on their platelet count and ejection fraction?**
+    # Summary of the model
+    summary(model)
+    ```
+
+3.  **Can we classify patients into low, medium, and high risk for heart complications based on their platelet count and ejection fraction?**
+
+    ### Add all attributes
 
     This is a classification question. We can use a logistic regression model with platelet count and ejection fraction as the independent variables and death event as the dependent variable. We can separate into risk categories by dividing the test samples into three categories based on the predicted probabilities.
 
@@ -621,7 +642,7 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     As seen above, we can use platelet count and ejection fraction to assign a risk category for each sample in the data set. We can see that in the test data set, most of the samples fall in the low or medium risk categories. This could potentially be caused by the test data being a smaller section of the whole data set.
 
-5.  **Does the presence of diabetes modify the relationship between ejection fraction and time of follow-up?**
+4.  **Does the presence of diabetes modify the relationship between ejection fraction and time of follow-up?**
 
     We can use a linear regression model and mutation to answer this question. This is because we can mutate a value that is a ratio of ejection fraction and time and use that in a linear regression model with diabetes to see the relationship between the attributes.
 
@@ -633,11 +654,13 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     We can see that the affect of diabetes on the relationship between ejection fraction and follow up time is not significant, because the p-value of the model is greater than 0.05, which means we accept the null hypothesis, which is that there is no relation.
 
-6.  **What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?**
+5.  **What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?**
 
     If we want to predict follow-up time, we can create a prediction model using a multiple regression model of the different attributes. We would need to create the model and use a portion of the data set to train.
 
-7.  **Is there a significant interaction effect between diabetes status and smoking on serum sodium levels?**
+6.  **Is there a significant interaction effect between all of the attributes on serum sodium levels?**
+
+    ### Add all attributes
 
     Because we have two different independent variables in this question, we should use a multiple regression model to analyze the relationships between the variables.
 
@@ -648,31 +671,15 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     To answer the above question, we can look at the p-values of the independent variables in the model. If the p-value is less than 0.05, then there is a significant relationship between the variables. In this case, the p-values for diabetes and smoking are both above 0.05. This means we accept the null hypothesis, which states that there is no significant relationship between diabetes or smoking on serum sodium levels.
 
-8.  **What are the primary factors associated with abnormal serum sodium levels in heart failure patients?**
-
-    Multiple Linear Regression or Logistic Regression this is because multiple linear regression can help identify how various factors together influence serum sodium levels as a continuous outcome, logistic regression is appropriate for identifying the likelihood of having abnormal serum sodium levels associated with predictors.
-
-9.  **Is there a relation between smoking and creatinine phosphokinase, serum creatine, and serum sodium levels?**
-
-    We can use Cluster analysis to help us to identify subgroups of heart failure patients with similar CPK levels and survival rates. This might reveal clusters with different survival patterns.
-
-10. **What are the healthy ranges of the attributes?**
-
-    Logistic Regression this is because this analysis looks at a binary outcome (death yes/no) and logistic regression is suitable for modeling the probability of death as a function of smoking status (smoker/non-smoker), possibly controlling for other variables.
-
-11. **How are the rates of death from heart failure and smoking related?**
+7.  **Can we predict if a person was smoking based on all of the other attributes?**
 
     Multivariate Analysis of Variance or Multiple Linear Regression. If looking at the relationship between smoking and these three continuous variables simultaneously, we can determine if the mean vectors of these measurements differ between smokers and non-smokers. Multiple linear regression could be used if we are focusing on the influence of smoking on each measure separately.
 
-12. **How does Creatinine Phosphokinase affect the rate of survival of heart failure?**
-
-    Logistic Regression with Model Comparison this is because logistic regression is ideal for modeling binary outcomes based on multiple predictors. To determine the greatest effect, we could compare the standardized coefficients of different attributes or use a model selection technique.
-
-13. **Are there specific subgroups within the population that are at higher risk of developing heart failure?**
+8.  **Are there specific subgroups within the population that are at higher risk of developing heart failure?**
 
     Cluster Analysis or Decision Trees, this is because cluster analysis could identify distinct subgroups within the population based on similarities in their characteristics. Decision trees can be used to create a model that predicts the risk of heart failure, providing a clear path of decision nodes that highlight risk factors and their thresholds.
 
-14. **What is the distribution of age among patients who experienced a heart failure death event?**
+9.  **What is the distribution of age among patients who experienced a heart failure death event?**
 
     This question can be answered using visualization to view the distribution of ages for patients who died from heart failure.
 
@@ -686,74 +693,10 @@ ggplot(heart, aes(x = platelets, y = time)) +
 
     By using the facet feature to separate the graph for age based on death event, we can see the distribution of ages for those who lived and died from heart failure. The graph of samples who survived is much more concentrated to the left of the graph as compared to the graph of samples who died. The graph of samples who died has a much greater number of samples in the higher ages, which tells us that people who are older are much less likely to survive heart failure than people who are younger.
 
-15. **How does anaemia affect the mortality rate in heart failure patients?**
-
-    To answer this question, we will the Chi-Square test to determine if there is a significant relationship between anaemia and mortality rate. If there is, we will use a logistic regression model. This is because we have two categorical variables and we want to see the relationship between them.
-
-    ```{r}
-    chi_square_test <- chisq.test(table(heart$anaemia, heart$DEATH_EVENT))
-    print(chi_square_test)
-    ```
-
-    Based on the p-value in the Chi-Square test, which is less than 0.05, we must accept the null hypothesis and conclude that there is no significant relationship between anaemia and death by heart failure.
-
-16. **Does having diabetes increase the risk of death in heart failure patients?**
-
-    We can use a logistic regression model to see if diabetes has an effect on death rates from heart failure because both diabetes and DEATH_EVENT are categorical variables. But first we need to use the Chi-Square test to determine if there is a relationship between the two variables.
-
-    ```{r}
-    chi_square_test <- chisq.test(table(heart$diabetes, heart$DEATH_EVENT))
-    print(chi_square_test)
-
-    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
-    test_indices <- setdiff(1:nrow(heart), train_indices)  
-    train_data <- heart[train_indices, ]
-    test_data <- heart[test_indices, ]
-
-    model <- glm(DEATH_EVENT ~ serum_creatinine, data = train_data, family = binomial)
-
-    prediction <- predict(model, newdata = test_data, type = "response")
-    ```
-
-    We can see that the p-value from the Chi-Square test is 1, which is much larger than 0.05. This means we accept the null hypothesis and conclude that there is no significant relation between having diabetes and dying from heart failure.
-
-17. **What are the typical ejection fraction values in patients who survive vs. those who don't?**
+10. **What are the typical ejection fraction values in patients who survive vs. those who don't?**
 
     T-test, Since this is about comparing the means of a continuous variable (ejection fraction) between two groups (survivors vs. non-survivors), a t-test is appropriate.
 
-18. **How does high blood pressure impact the survival rates of heart failure patients?**
-
-19. **Are lower platelet counts associated with higher mortality in heart failure patients?**
+11. **Are lower platelet counts associated with higher mortality in heart failure patients?**
 
     Use logistic regression to assess if lower platelet counts are associated with higher mortality, adjusting for other factors., Logistic regression is suitable if the outcome is binary
-
-20. **What role does serum creatinine play in predicting heart failure outcomes?**
-
-    Because this is a prediction problem, we can use a logistic regression model to predict the affect on mortality that serum creatinine has.
-
-    ```{r}
-    t_test <- t.test(heart$serum_creatinine ~ heart$DEATH_EVENT)
-    print(t_test)
-
-    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
-    test_indices <- setdiff(1:nrow(heart), train_indices)  
-    train_data <- heart[train_indices, ]
-    test_data <- heart[test_indices, ]
-
-    model <- glm(DEATH_EVENT ~ serum_creatinine, data = train_data, family = binomial)
-
-    prediction <- predict(model, newdata = test_data, type = "response")
-
-    predicted.classes <- ifelse(prediction > 0.5, "1", "0")
-    print(paste("Accuracy: ", mean(predicted.classes == test_data$DEATH_EVENT)))
-    ```
-
-    Based on the above analysis, serum creatinine clearly plays a role in heart failure outcomes. The p-value of the t-test is near zero, so we reject the null hypothesis and accept the alternative hypothesis, which states that there is a significant relation between serum creatinine and death event. Then, using training data to create the model and test data to create the prediction model, we found the prediction model to have an accuracy of 72%, which is the affect on predicting heart failure outcomes that serum creatinine has.
-
-21. **How does serum sodium concentration relate to heart failure mortality?**
-
-    Analyze using logistic regression to see if lower sodium levels are associated with increased mortality risk., determining whether low serum sodium is associated with increased mortality risk has a binary outcome
-
-22. **Does the gender or smoking status of a patient significantly influence heart failure outcomes?**
-
-    Use multivariable regression model to assess impact
