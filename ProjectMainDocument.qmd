@@ -7,9 +7,21 @@ editor: visual
 
 ## Data Analytics Group Project
 
-Group Members: Zack, Mustapha, Kerim, Chris
+Group Members: Zack Charlebois, Mustapha Ceesay, Kerim Kadioglu, Chris Coonan
 
 ## Heart Failure Prediction
+
+**A Background on Heart Failure**
+
+Heart failure is a serious condition affecting millions globally, where the heart cannot pump enough blood to meet the body's needs. This can result from various underlying conditions such as coronary artery disease, high blood pressure, or cardiomyopathy. Symptoms typically include shortness of breath, fatigue, and swelling in the legs, ankles, and feet due to fluid buildup. The impact of heart failure is significant, with substantial healthcare costs and a profound effect on quality of life. Treatment focuses on managing symptoms and underlying causes through medications, lifestyle changes, and in some cases, surgical interventions. Despite advances in treatment, heart failure remains a leading cause of hospitalization and mortality among older adults​.
+
+**The importance of predictive modeling in heart failure management**
+
+Predictive modeling plays a crucial role in managing heart failure by enhancing decision-making processes, particularly in predicting patient outcomes like hospital readmission, mortality, and the need for advanced therapies. Utilizing machine learning techniques, these models analyze vast amounts of data from electronic health records to identify patterns that may not be apparent through traditional methods. This allows for early intervention and personalized treatment strategies, which can significantly improve patient outcomes and reduce healthcare costs by targeting resources more effectively. Predictive modeling also aids in the timely referral of patients for advanced therapies, such as heart transplants or mechanical circulatory support, ultimately improving survival rates and quality of life
+
+**Research Problem and Objective**
+
+The purpose of this research project is to investigate the potential of utilizing multiple clinical and biochemical attributes of heart failure patients to develop predictive models for various outcomes and complications. Specifically, the study aims to explore the predictive power of these attributes in estimating ejection fraction levels, serum creatinine levels, risk stratification for heart complications, presence of diabetes, follow-up time, serum sodium levels, mortality rates, and smoking status. By leveraging the available patient data, the research endeavors to uncover valuable insights and develop robust predictive models that can aid in better understanding, risk assessment, and management of heart failure patients.
 
 #### About the Data set:
 
