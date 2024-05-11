@@ -7,6 +7,10 @@ editor: visual
 ```{r}
 library(tidyverse)
 library("dplyr")
+library(caret)
+library(rpart)
+library(pROC)
+library(xgboost)
 
 heart <- read.csv("heart_failure_clinical_records_dataset.csv")
 heart
@@ -14,115 +18,477 @@ heart
 
 ## Research Questions:
 
-1.  **Can we predict which patients are likely to have a serum sodium level below the normal range based on their ejection fraction and time of follow-up?**
+1.  **Can we predict which patients are likely to have a serum sodium level below the normal range based** **on their other attributes?**
 
     We could use Linear regression , if serum creatinine levels are treated as a continuous dependent variable and multiple regression if there are non linear relationships
 
     ```{r}
-    ggplot(heart, aes(x=ejection_fraction, y=serum_sodium, color=factor(DEATH_EVENT), shape=factor(DEATH_EVENT))) +
-      geom_point(alpha=0.7) +
-      labs(title="Scatter Plot of Ejection Fraction vs. Serum Sodium Levels",
-           x="Ejection Fraction (%)", y="Serum Sodium (mEq/L)") +
-      theme_minimal()
+    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+    test_indices <- setdiff(1:nrow(heart), train_indices)
+    train_data <- heart[train_indices, ]
+    test_data <- heart[test_indices, ]
 
+    xgb_model <- train(
+      ejection_fraction ~ ., 
+      data = train_data, 
+      method = "xgbTree", 
+      trControl = trainControl(method = "cv", number = 5),
+      verbose = FALSE
+    )
 
-    correlation_result <- cor.test(heart$ejection_fraction, heart$serum_sodium)
-    print(correlation_result)
+    # Make predictions on test data
+    xgb_predictions <- predict(xgb_model, newdata = test_data)
+
+    # Evaluate model performance
+    rmse <- sqrt(mean((xgb_predictions - test_data$ejection_fraction)^2))
+    cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+
+    # Visualize actual vs. predicted ejection fraction levels
+    plot(test_data$ejection_fraction, xgb_predictions,
+         xlab = "Actual Ejection Fraction", 
+         ylab = "Predicted Ejection Fraction",
+         main = "Actual vs. Predicted Plot (XGBoost)")
+    abline(0, 1, col = "red")
+
+    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+    test_indices <- setdiff(1:nrow(heart), train_indices)
+    train_data <- heart[train_indices, ]
+    test_data <- heart[test_indices, ]
+    library(ggplot2)
+    lm_model <- lm(ejection_fraction ~ ., data = train_data)
+    lm_predictions <- predict(lm_model, newdata = test_data)
+    rmse <- sqrt(mean((lm_predictions - test_data$ejection_fraction)^2))
+    cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+    rsquared <- summary(lm_model)$r.squared
+    cat("R-squared (R²) Value:", rsquared, "\n")
+    ggplot(data = test_data, aes(x = ejection_fraction, y = lm_predictions)) +
+      geom_point() +
+      geom_abline(intercept = 0, slope = 1, color = "red") +
+      labs(x = "Actual Ejection Fraction", y = "Predicted Ejection Fraction",
+           title = "Actual vs. Predicted Plot (Linear Regression)")
+    threshold <- 50 
+    test_data$predicted_below_normal <- ifelse(lm_predictions < threshold, "Yes", "No")
+    ggplot(data = test_data, aes(x = ejection_fraction, y = lm_predictions, color = predicted_below_normal)) +
+      geom_point() +
+      geom_abline(intercept = 0, slope = 1, color = "red") +
+      labs(x = "Actual Ejection Fraction", y = "Predicted Ejection Fraction",
+           title = "Actual vs. Predicted Plot (Linear Regression)",
+           color = "Predicted Below Normal") +
+      scale_color_manual(values = c("Yes" = "blue", "No" = "green"))
+
 
     ```
 
-2.  **Is it possible to model serum creatinine levels as a function of platelet count and time since the last follow-up?**
+    Both models showed poor predictive abilities. The RMSE was 11.92, 11.91,  which further shows that both models are not accurately predicting ejection fraction levels based on the other attributes. The high rsme indicates a large average deviation between the predicted and the actual results. Thus, with our current models the predictions are not accurate.
 
-    Logistic regression for binary outcome
+2.  **Is it possible to model serum creatinine levels as a function of the remaining attributes?**
+
+    Modeling serum creatinine levels as a function of the remaining attributes in heart failure prediction is a relevant and potentially valuable approach. Serum creatinine is a crucial biomarker that reflects kidney function, and elevated levels can indicate impaired renal function, which is often associated with heart failure. By exploring the relationships between serum creatinine and other attributes, such as age, gender, blood pressure, smoking status, and various laboratory tests, researchers may gain insights into the factors that influence creatinine levels and, consequently, kidney function. This understanding could potentially aid in the early detection of renal impairment, a common complication in heart failure patients, and contribute to more accurate risk stratification and personalized treatment strategies. Consequently, this question was chosen to investigate the potential predictors of serum creatinine levels and their implications for heart failure risk assessment.
 
     ```{r}
-    heart$high_serum_creatinine <- ifelse(heart$serum_creatinine > 1.2, 1, 0)
+    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+    test_indices <- setdiff(1:nrow(heart), train_indices)
+    train_data <- heart[train_indices, ]
+    test_data <- heart[test_indices, ]
 
-    # Fit logistic regression model
-    model <- glm(high_serum_creatinine ~ platelets + time, data = heart, family = binomial())
+    lm_model <- lm(serum_creatinine ~ ., data = train_data)
+    lm_predictions <- predict(lm_model, newdata = test_data)
+    rmse <- sqrt(mean((lm_predictions - test_data$serum_creatinine)^2))
+    cat("Root Mean Squared Error (RMSE):", rmse, "\n")
+    fitted_values <- fitted(lm_model)
+    residuals <- resid(lm_model)
+    plot(fitted_values, residuals, 
+         xlab = "Fitted Values", 
+         ylab = "Residuals",
+         main = "Residuals vs. Fitted Plot")
+    abline(h = 0, col = "red")
 
-    # Summary of the model
-    summary(model)
+    rsquared <- summary(lm_model)$r.squared
+    cat("R-squared (R²) Value:", rsquared, "\n")
+    plot(test_data$serum_creatinine, lm_predictions, 
+         xlab = "Actual Serum Creatinine", 
+         ylab = "Predicted Serum Creatinine",
+         main = "Actual vs. Predicted Plot")
+    abline(0, 1, col = "red")
+    lm_summary <- summary(lm_model)
+    cat("\nAdditional Information:\n")
+    print(lm_summary)
+
     ```
+
+    Based on the output it is possible to model serum creatinine levels as a function of the remaining attributes. The model provided evidence supporting this. Also, the model’s R-squared was around 41%. Thus, based on the results of the linear regression analysis, it is possible to model serum creatinine levels. Serum sodium has a coefficient of 0.047 and a p-value of 0.0399 which shows significance. Moreover, higher serum sodium levels are associated with higher levels of serum creatinine. 
 
 3.  **Can we classify patients into low, medium, and high risk for heart complications based on their platelet count and ejection fraction?**
 
-    ### Add all attributes
-
-    Classification
-
     We can use a logistic regression model, decision tree, or svm model with all of the patients attributes as the independent variables and death event as the dependent variable. We can separate into risk categories by dividing the test samples into three categories based on the predicted probabilities.
 
+```{r}
+#----------------------------------------------
+#Test data
+test_model <- glm(DEATH_EVENT ~ ., data = train_data, family = binomial)
+summary(test_model)
+
+```
+
+By looking at the p-values above, we can see that the only attributes with a significant relationship with DEATH_EVENT (p-value less than 0.05) are age, ejection_fraction, serum_creatinine, and time. These attributes will be our independent variables in our different models.
+
+```{r}
+#----------------------------------------------
+set.seed(123)
+train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+test_indices <- setdiff(1:nrow(heart), train_indices)  
+train_data <- heart[train_indices, ]
+test_data <- heart[test_indices, ]
+
+train_data$DEATH_EVENT <- factor(train_data$DEATH_EVENT)
+test_data$DEATH_EVENT <- factor(test_data$DEATH_EVENT)
+
+#Logistic Regression Model
+
+log_model <- glm(DEATH_EVENT ~ age + ejection_fraction + serum_creatinine + time, data = train_data, family = binomial)
+summary(log_model)
+log_predictions <- predict(log_model, newdata = test_data, type = "response")
+
+log_predicted_classes <- ifelse(log_predictions > 0.5, "1", "0")
+print(paste("Logistic Regression Accuracy: ", mean(log_predicted_classes == test_data$DEATH_EVENT)))
+
+log_predicted_classes <- factor(log_predicted_classes)
+log_conf_matrix <- confusionMatrix(log_predicted_classes, test_data$DEATH_EVENT, positive = "1")
+print(log_conf_matrix)
+
+
+#-----------------------------------------------------------
+#SVM
+
+svm_model <- train(
+  DEATH_EVENT ~ age + ejection_fraction + serum_creatinine + time , data = train_data, method = "svmLinear",
+  trControl = trainControl(method = "cv", number = 10),
+  preProcess = c("center","scale")
+)
+
+svm_predictions <- svm_model |> predict(test_data)
+
+print(paste("SVM Accuracy: ", mean(svm_predictions == test_data$DEATH_EVENT)))
+
+svm_conf_matrix <- confusionMatrix(svm_predictions, test_data$DEATH_EVENT, positive = "1")
+print(svm_conf_matrix)
+
+#-----------------------------------------------------------
+#Decision Tree
+
+dec_model <- rpart(DEATH_EVENT ~ age + ejection_fraction + serum_creatinine + time, data = train_data, method="class")
+
+dec_predicted_classes <- dec_model |>
+  predict(test_data, type="class")
+print(paste("Decision Tree Accuracy: ", mean(dec_predicted_classes == test_data$DEATH_EVENT)))
+
+dec_conf_matrix <- confusionMatrix(dec_predicted_classes, test_data$DEATH_EVENT, positive = "1")
+print(dec_conf_matrix)
+
+
+#----------------------------------------------------------
+#ROC
+res.roc <- roc(as.numeric(test_data$DEATH_EVENT), as.numeric(log_predicted_classes))
+plot.roc(res.roc, print.auc = TRUE)
+
+res.roc <- roc(as.numeric(test_data$DEATH_EVENT), as.numeric(svm_predictions))
+plot.roc(res.roc, print.auc = TRUE)
+
+res.roc <- roc(as.numeric(test_data$DEATH_EVENT), as.numeric(dec_predicted_classes))
+plot.roc(res.roc, print.auc = TRUE)
+
+```
+
+When comparing these models, they all have an overall accuracy that is similar, but the most important part of the accuracy to look at is the Type II error. Type II error is a false negative, and with this model, this is much worse than Type I error because Type II error is predicting a person will not die, but they did die, while Type I error is predicting a person will die, but they live. For the logistic regression model, the sensitivity is 0.5517. For the SVM model, the sensitivity is also 0.5517. Finally, for the Decision Tree model, the sensitivity is 0.6897. This means that the Decision Tree model is less likely to incorrectly classify a positive result as a negative when compared to the other models. Therefore, the Decision Tree is the best model to predict the potential outcomes for the patients. However, the question wants us to divide the patients into three risk groups (low, medium, and high risk), and the Decision Tree gives us predictions in the binary value of DEATH_EVENT, so we cannot easily divide the patients into three groups. Therefore, we should use logistic regression for categorizing the patients into risk categories.
+
+```{r}
+#------------------------------------------------------------
+#Divide into risk categories
+
+low <- 0.33
+medium <- 0.66
+
+risk_category <- ifelse(log_predictions < low, "Low",
+                                 ifelse(log_predictions > medium, "High", "Medium"))
+
+risk_data <- data.frame(age = test_data$age, ejection_fraction = test_data$ejection_fraction, serum_creatinine = test_data$serum_creatinine, time = test_data$time, risk_category = risk_category)
+risk_data
+```
+
+By using the above table, we are able to assess a patient’s risk level for death from heart failure based on the significant attributes of the patient.
+
+4.  **Which attributes can be used to predict if a patient has diabetes?**
+
+    This is relevant for a heart failure prediction data analysis project presentation. Diabetes is a significant comorbidity and risk factor for heart failure, and identifying patients with diabetes is crucial for proper management and treatment planning. By analyzing attributes such as age, body mass index, blood glucose levels, medication history, and other relevant factors, researchers may be able to develop predictive models to identify individuals with a higher likelihood of having diabetes. This information can guide targeted screening and early intervention, potentially slowing the progression of heart failure and reducing the risk of complications associated with undiagnosed or poorly controlled diabetes. Addressing this question aligns with the goal of improving patient outcomes by enabling early identification and appropriate management of comorbidities that can exacerbate heart failure.
+
+    We can see which attributes can be used to predict diabetes in a patient by using one of several different classification models, such as a logistic regression model, decision tree, or svm model, with all of the patient's attributes as the independent variables and diabetes as the dependent variable. If the attributes have a significant relationship with diabetes, then they will have p-values that are less than 0.05.
+
     ```{r}
+    #Look at p-values of attributes
+    test_model <- glm(diabetes ~ ., data = train_data, family = binomial)
+    summary(test_model)
+    ```
+
+    ```{r}
+    set.seed(124)
     train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
     test_indices <- setdiff(1:nrow(heart), train_indices)  
     train_data <- heart[train_indices, ]
     test_data <- heart[test_indices, ]
 
-    model <- glm(DEATH_EVENT ~ platelets + ejection_fraction, data = train_data, family = binomial)
+    train_data$diabetes <- factor(train_data$diabetes)
+    test_data$diabetes <- factor(test_data$diabetes)
 
-    prediction <- predict(model, newdata = test_data, type = "response")
+    #Logistic Regression Model
 
-    low <- 0.33
-    medium <- 0.66
+    log_model <- glm(diabetes ~ platelets, data = train_data, family = binomial)
+    summary(log_model)
+    log_predictions <- predict(log_model, newdata = test_data, type = "response")
 
-    risk_category <- ifelse(prediction < low, "Low", 
-                             ifelse(prediction < medium, "Medium", 
-                                    ifelse(prediction > medium, "High", "")))
+    log_predicted_classes <- ifelse(log_predictions > 0.5, "1", "0")
+    print(paste("Logistic Regression Accuracy: ", mean(log_predicted_classes == test_data$diabetes)))
 
-    risk_data <- data.frame(platelets = test_data$platelets, ejection_fraction = test_data$ejection_fraction, risk_category = risk_category)
+    log_predicted_classes <- factor(log_predicted_classes)
+    log_conf_matrix <- confusionMatrix(log_predicted_classes, test_data$diabetes, positive = "1")
+    print(log_conf_matrix)
 
-    risk_data
+
+    #-----------------------------------------------------------
+    #SVM
+
+    svm_model <- train(
+      diabetes ~ platelets , data = train_data, method = "svmLinear",
+      trControl = trainControl(method = "cv", number = 10),
+      preProcess = c("center","scale")
+    )
+
+    svm_predictions <- svm_model |> predict(test_data)
+
+    print(paste("SVM Accuracy: ", mean(svm_predictions == test_data$diabetes)))
+
+    svm_conf_matrix <- confusionMatrix(svm_predictions, test_data$diabetes, positive = "1")
+    print(svm_conf_matrix)
+
+    #-----------------------------------------------------------
+    #Decision Tree
+
+    dec_model <- rpart(diabetes ~ platelets, data = train_data, method="class")
+
+    dec_predicted_classes <- dec_model |>
+      predict(test_data, type="class")
+    print(paste("Decision Tree Accuracy: ", mean(dec_predicted_classes == test_data$DEATH_EVENT)))
+
+    dec_conf_matrix <- confusionMatrix(dec_predicted_classes, test_data$diabetes, positive = "1")
+    print(dec_conf_matrix)
+
+
+    #----------------------------------------------------------
+    #ROC
+    res.roc <- roc(as.numeric(test_data$diabetes), as.numeric(log_predicted_classes))
+    plot.roc(res.roc, print.auc = TRUE)
+
+    res.roc <- roc(as.numeric(test_data$diabetes), as.numeric(svm_predictions))
+    plot.roc(res.roc, print.auc = TRUE)
+
+    res.roc <- roc(as.numeric(test_data$diabetes), as.numeric(dec_predicted_classes))
+    plot.roc(res.roc, print.auc = TRUE)
+
     ```
 
-4.  **Which attributes can be used to predict if a patient has diabetes?**
-
-    Classification
-
-    ```{r}
-
-    ```
+    The only significant attribute is platelets, with a p-value of 0.015. Using Logistic Regression, SVM, and Decision Tree models, we can see that the accuracy is less than 60% for all the models. Logistic Regression and SVM have the highest spensitivity, with values of 1, while the Decision Tree is the best model for high specificity, with a value of 0.6875. Because of the relatively low accuracy rate, we can conclude that none of the attributes in this data set could reliably predict whether a patient has diabetes or not.
 
 5.  **What is the best predictor of follow-up time in heart failure patients among the available biochemical parameters?**
 
+    Follow-up time is ptentially important for a heart failure prediction. Identifying biochemical markers that can reliably predict the length of follow-up time in heart failure patients can have significant clinical implications. Longer follow-up times may indicate a more severe or progressive form of heart failure, requiring closer monitoring and more aggressive treatment strategies. Conversely, shorter follow-up times could suggest a better prognosis or response to treatment. By identifying the best biochemical predictor(s), healthcare providers can stratify patients based on their risk profiles, allocate resources efficiently, and tailor management plans accordingly. This question aligns with the goal of improving patient outcomes by enabling personalized care and optimizing resource utilization based on objective biochemical markers and their predictive power for follow-up time.
+
     If we want to predict follow-up time, we can create a prediction model using a multiple regression model of the different attributes. We would need to create the model and use a portion of the data set to train.
 
-6.  **Is there a significant interaction effect between all of the other attributes on serum sodium levels?**
+    ```{r}
+    df <- heart
+    # Calculate the correlation matrix
+    correlations <- cor(df[, c("creatinine_phosphokinase", "ejection_fraction", "platelets", "serum_creatinine", "serum_sodium", "time")], use = "pairwise.complete.obs")
 
-    ### Add all attributes
+    # Extract the correlations with 'time' feature
+    correlation_with_time <- correlations["time", ]
 
-    Regression
+    # Drop the correlation of 'time' with itself
+    correlation_with_time <- correlation_with_time[-which(names(correlation_with_time) == "time")]
+
+    # Print the correlations
+    print(correlation_with_time)
+
+
+    df <- heart
+    # Calculate the correlation matrix
+
+    ```
+
+    Among these, Serum Sodium shows the strongest positive correlation with follow-up time, although it's still relatively weak. This suggests that among the biochemical parameters considered, Serum Sodium has the best (but still limited) predictive power regarding follow-up time in heart failure patients. ​​
+
+6.  **Is there a relation between smoking and creatinine phosphokinase, serum creatine, and serum sodium?**
+
+    The question regarding the relationship between smoking and biomarkers such as creatinine phosphokinase, serum creatine, and serum sodium is very important. These biomarkers can provide insights into muscle damage, kidney function, and electrolyte imbalances, which are often associated with cardiovascular diseases, including heart failure. Smoking is a well-known risk factor for various health complications, including heart disease. Understanding the potential correlations between smoking and these biomarkers may help identify potential predictors or indicators of heart failure risk, which could aid in early detection and intervention strategies. This question was chosen to explore the potential impact of smoking on these biomarkers and their relevance in the context of heart failure prediction.
 
     ```{r}
-    model <- lm(serum_sodium ~ diabetes * smoking, data = heart)
-    summary(model)
+    manova_result <- manova(cbind(creatinine_phosphokinase, serum_creatinine, serum_sodium) ~ smoking, data = heart)
+    summary(manova_result)
     ```
+
+    Based on the MANOVA result there is no statistically significant relationship when considering the factors together, as indicated by the high p-value in the MANOVA test result.
+
+    A second question could be “Is there a relation between smoking and creatinine phosphokinase, serum creatine, and serum sodium individually?”
+
+    ```{r}
+    # Linear regression 
+    lm_cp <- lm(creatinine_phosphokinase ~ smoking, data = heart)
+    summary(lm_cp)
+
+    lm_sc <- lm(serum_creatinine ~ smoking, data = heart)
+    summary(lm_sc)
+
+    lm_ss <- lm(serum_sodium ~ smoking, data = heart)
+    summary(lm_ss)
+    ```
+
+    Therefore, based on the results, the conclusion is that smoking does not have a statistically significant relationship with the levels of creatinine phosphokinase, serum creatinine, or serum sodium individually, and it also does not have a combined effect on these variables as a group.
 
 7.  **How do all of the different attributes affect the rate of mortality from heart failure?**
 
-    Classification
+    The question is crucial because it aims to understand the complex interplay between various factors and the risk of mortality in heart failure patients. By analyzing attributes such as age, comorbidities (e.g., diabetes, hypertension), clinical measurements (e.g., ejection fraction, creatinine levels), and lifestyle factors (e.g., smoking), researchers can identify significant risk factors and potential predictors of mortality. This knowledge can inform risk stratification strategies, targeted interventions, and personalized treatment plans, ultimately improving patient outcomes and survival rates. Addressing this question is essential for developing comprehensive predictive models and gaining insights into the multifaceted nature of heart failure progression and prognosis.
 
     ```{r}
+    library(broom)
+    library(ggplot2)
+    model <- glm(DEATH_EVENT ~ ., family = binomial(), data = heart)
+    summary(model)
+    tidied_model <- tidy(model)
+
+    # Calculate confidence intervals
+    tidied_model$ci_lower <- tidied_model$estimate - 1.96 * tidied_model$std.error
+    tidied_model$ci_upper <- tidied_model$estimate + 1.96 * tidied_model$std.error
+
+    # Create a coefficient plot
+    ggplot(tidied_model, aes(x = estimate, y = term, xmin = ci_lower, xmax = ci_upper)) +
+      geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+      geom_pointrange() +
+      labs(title = "Coefficient Plot of Logistic Regression Model",
+           x = "Coefficient Estimate",
+           y = "Predictors") +
+      theme_minimal()
 
     ```
+
+    Age: Each additional year in age increased the risk of mortality by about 4.74% (p = 0.0027).
+
+    Anaemia: Presence of anaemia was not significantly associated with mortality (p = 0.983).
+
+    Creatinine Phosphokinase: Higher levels of this enzyme showed a non-significant trend towards increased mortality risk (p = 0.212).
+
+    Diabetes: Diabetes status did not significantly impact mortality rates (p = 0.679).
+
+    Ejection Fraction: Higher ejection fraction, indicating better heart pump function, significantly reduced mortality risk (p \< 0.00001).
+
+    High Blood Pressure: High blood pressure had no significant effect on mortality (p = 0.775).
+
+    Platelets: Platelet count was not significantly associated with mortality (p = 0.525).
+
+    Serum Creatinine: Higher serum creatinine levels were strongly associated with increased risk of mortality (p = 0.000242).
+
+    Serum Sodium: Lower serum sodium levels were marginally associated with increased mortality risk (p = 0.092).
+
+    Sex: There was no significant difference in mortality rates between sexes (p = 0.197).
+
+    Smoking: Smoking status did not significantly affect mortality rates (p = 0.974).
+
+    Time: Longer time since diagnosis was strongly associated with a reduced risk of mortality (p = 2.92e-12).
 
     1.  **Follow up: Which attribute has the greatest effect on chances of dying from heart failure?**
 
-        Classification
-
-        ```{r}
-
-        ```
+        Among all the predictors, time since diagnosis had the most significant impact on reducing mortality risk, evidenced by its strong negative association with death events. Physiologically, serum creatinine levels exhibited the greatest positive impact on increasing mortality risk, highlighting its importance in clinical evaluation and management.
 
 8.  **Can we predict if a person was smoking based on all of the other attributes?**
 
-    Multivariate Analysis of Variance or Multiple Linear Regression. If looking at the relationship between smoking and these three continuous variables simultaneously, we can determine if the mean vectors of these measurements differ between smokers and non-smokers. Multiple linear regression could be used if we are focusing on the influence of smoking on each measure separately.
+    To determine if we can predict if a patient was smoking based on the attributes in the data set, we first need to determine which attributes have a significant effect on smoking.
 
     ```{r}
+    #Look at p-values of attributes
+    test_model <- glm(smoking ~ ., data = train_data, family = binomial)
+    summary(test_model)
+    ```
+
+    By looking at the p-values, we can see that sex and platelets are the only attributes that have a significant relationship with smoking. For the rest of the attributes, we accept the null hypothesis and conclude that they do not have any significant interaction with smoking. Next, we have to choose which classification model to use to predict the smoking outcomes.
+
+    ```{r}
+    #----------------------------------------------
+    #set.seed(124)
+    train_indices <- sample(1:nrow(heart), 0.7 * nrow(heart)) 
+    test_indices <- setdiff(1:nrow(heart), train_indices)  
+    train_data <- heart[train_indices, ]
+    test_data <- heart[test_indices, ]
+
+    train_data$smoking <- factor(train_data$smoking)
+    test_data$smoking <- factor(test_data$smoking)
+
+    #Logistic Regression Model
+
+    log_model <- glm(smoking ~ sex + platelets, data = train_data, family = binomial)
+    summary(log_model)
+    log_predictions <- predict(log_model, newdata = test_data, type = "response")
+
+    log_predicted_classes <- ifelse(log_predictions > 0.5, "1", "0")
+    print(paste("Logistic Regression Accuracy: ", mean(log_predicted_classes == test_data$DEATH_EVENT)))
+
+    log_predicted_classes <- factor(log_predicted_classes)
+    log_conf_matrix <- confusionMatrix(log_predicted_classes, test_data$smoking, positive = "1")
+    print(log_conf_matrix)
+
+
+    #-----------------------------------------------------------
+    #SVM
+
+    svm_model <- train(
+      smoking ~ sex + platelets, data = train_data, method = "svmLinear",
+      trControl = trainControl(method = "cv", number = 10),
+      preProcess = c("center","scale")
+    )
+
+    svm_predictions <- svm_model |> predict(test_data)
+
+    print(paste("SVM Accuracy: ", mean(svm_predictions == test_data$smoking)))
+
+    svm_conf_matrix <- confusionMatrix(svm_predictions, test_data$smoking, positive = "1")
+    print(svm_conf_matrix)
+
+    #-----------------------------------------------------------
+    #Decision Tree
+
+    dec_model <- rpart(smoking ~ sex + platelets, data = train_data, method="class")
+
+    dec_predicted_classes <- dec_model |>
+      predict(test_data, type="class")
+    print(paste("Decision Tree Accuracy: ", mean(dec_predicted_classes == test_data$smoking)))
+
+    dec_conf_matrix <- confusionMatrix(dec_predicted_classes, test_data$smoking, positive = "1")
+    print(dec_conf_matrix)
+
+    #----------------------------------------------------------
+    #ROC
+    res.roc <- roc(as.numeric(test_data$smoking), as.numeric(log_predicted_classes))
+    plot.roc(res.roc, print.auc = TRUE)
+
+    res.roc <- roc(as.numeric(test_data$smoking), as.numeric(svm_predictions))
+    plot.roc(res.roc, print.auc = TRUE)
+
+    res.roc <- roc(as.numeric(test_data$smoking), as.numeric(dec_predicted_classes))
+    plot.roc(res.roc, print.auc = TRUE)
 
     ```
 
+    Because there is no greater cost associated with Type I errors compared to Type II errors, we should look at the overall accuracy of the model to determine which one is the best. We can eliminate the SVM model, as it has a specificity value of 1 and a sensitivity value of 0, which means it will only predict true negatives and false negatives, which is not helpful in prediction. Comparing the logistic model and decision tree, we can see that the logistic model has a higher overall accuracy, which makes it the best choice from the available models. It still has a prediction accuracy of only 65%, so while we can predict if a patient is smoking based on their attributes, there is a large potential for incorrect classification.
+
 9.  **What is the distribution of age among patients who experienced a heart failure death event?**
+
+    This question is highly relevant for a heart failure prediction . Age is a well-established risk factor for cardiovascular diseases, including heart failure. Understanding the age distribution of patients who experienced a fatal outcome can provide valuable insights into the potential age-related vulnerabilities and age-specific risk profiles. This information can guide targeted screening, risk stratification, and tailored management strategies for different age groups. By addressing this question, researchers can identify high-risk age groups and develop age-specific interventions to improve survival rates and quality of life for heart failure patients.
 
     This question can be answered using visualization to view the distribution of ages for patients who died from heart failure.
 
@@ -134,20 +500,82 @@ heart
 
     ```
 
+    -   Mean Age: 65.2 years
+
+    -   Standard Deviation: 13.2 years
+
+    -   Minimum Age: 42 years
+
+    -   25th Percentile: 55 years
+
+    -   Median Age: 65 years
+
+    -   75th Percentile: 75 years
+
+    -   Maximum Age: 95 years
+
     By using the facet feature to separate the graph for age based on death event, we can see the distribution of ages for those who lived and died from heart failure. The graph of samples who survived is much more concentrated to the left of the graph as compared to the graph of samples who died. The graph of samples who died has a much greater number of samples in the higher ages, which tells us that people who are older are much less likely to survive heart failure than people who are younger.
 
 10. **What are the typical ejection fraction values in patients who survive vs. those who don't?**
 
+    This question is highly relevant for a heart failure prediction. Ejection fraction, a measure of the heart's pumping efficiency, is a critical indicator of cardiac function and a key prognostic factor in heart failure. Comparing ejection fraction values between survivors and non-survivors can provide valuable insights into the relationship between cardiac performance and mortality risk. This information can aid in risk stratification, clinical decision-making, and the development of predictive models for mortality in heart failure patients. Additionally, understanding the typical ejection fraction ranges associated with improved survival can help guide therapeutic interventions aimed at preserving or improving cardiac function, ultimately leading to better patient outcomes.
+
     T-test, Since this is about comparing the means of a continuous variable (ejection fraction) between two groups (survivors vs. non-survivors), a t-test is appropriate.
 
     ```{r}
+    # Add a group column directly in the data frame for plotting
+    heart$group <- ifelse(heart$DEATH_EVENT == 0, "Survivors", "Non-Survivors")
+    heart$group <- as.factor(heart$group)
 
+    # Perform the Mann-Whitney U Test
+    test_result <- wilcox.test(ejection_fraction ~ group, data = heart, alternative = "two.sided")
+
+    # Output the test result
+
+
+    # Calculate summary statistics for each group
+    summary_stats_survivors <- summary(heart %>% filter(DEATH_EVENT == 0) %>% pull(ejection_fraction))
+    summary_stats_non_survivors <- summary(heart %>% filter(DEATH_EVENT == 1) %>% pull(ejection_fraction))
+
+    # Print the summary statistics
+    print("Summary Statistics for Survivors:")
+    print(summary_stats_survivors)
+    print("Summary Statistics for Non-Survivors:")
+    print(summary_stats_non_survivors)
+
+    # Identifying outliers using the IQR method
+    calculate_outliers <- function(data) {
+      Q1 <- quantile(data, 0.25)
+      Q3 <- quantile(data, 0.75)
+      IQR <- Q3 - Q1
+      lower_bound <- Q1 - 1.5 * IQR
+      upper_bound <- Q3 + 1.5 * IQR
+      return(data[data < lower_bound | data > upper_bound])
+    }
+
+    outliers_survivors <- calculate_outliers(heart %>% filter(DEATH_EVENT == 0) %>% pull(ejection_fraction))
+    outliers_non_survivors <- calculate_outliers(heart %>% filter(DEATH_EVENT == 1) %>% pull(ejection_fraction))
+
+    # Print the outliers
+    print("Outliers for Survivors:")
+    print(outliers_survivors)
+    print("Outliers for Non-Survivors:")
+    print(outliers_non_survivors)
+
+
+    # Create a boxplot
+    ggplot(heart, aes(x = group, y = ejection_fraction, fill = group)) +
+      geom_boxplot() +
+      labs(title = "Comparison of Ejection Fraction Values",
+           x = "Group",
+           y = "Ejection Fraction") +
+      theme_minimal()
     ```
 
-11. **Are lower platelet counts associated with higher mortality in heart failure patients?**
+    Mann-Whitney U test was chosen due to its suitability for comparing two independent samples which may not follow a normal distribution.
 
-    Use logistic regression to assess if lower platelet counts are associated with higher mortality, adjusting for other factors., Logistic regression is suitable if the outcome is binary
+    The results of the Wilcoxon rank sum test are as follows:
 
-    ```{r}
+    W statistic: 13176 P-value: 7.368×10\^(−7)
 
-    ```
+    The data shows that survivors generally have higher ejection fractions than non-survivors, with median values of 38.00% for survivors and 30.00% for non-survivors. This difference is significant and supports the medical understanding that higher ejection fractions are associated with better cardiovascular health and outcomes. The analysis clearly demonstrates the difference in ejection fractions between survivors and non-survivors of heart failure, with survivors showing generally better heart function. This underlines the importance of the ejection fraction as a prognostic indicator in heart failure management.
